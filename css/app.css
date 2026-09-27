@@ -128,6 +128,17 @@ button {
 
   font-size: 26px;
   font-weight: 900;
+
+  overflow: hidden;
+}
+
+.jubilee-mark img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  border-radius: inherit;
 }
 
 .form-group {
@@ -207,6 +218,25 @@ button {
   min-height: 100vh;
 }
 
+/*
+  FIX: sidebar rendering shorter than the main content.
+
+  layout.js injects <aside class="sidebar"> as a child of
+  #app-shell, not as #app-shell itself. #app-shell was
+  correctly stretching to the full row height as a flex item
+  of .app, but the plain block-level <aside> inside it only
+  grew to fit its own nav links, so the red background
+  stopped early while the taller main content kept going.
+
+  Making #app-shell a full-height flex column means its only
+  child (.sidebar) stretches to fill it, matching whichever
+  of the two columns (sidebar or main) is taller.
+*/
+.app-shell {
+  display: flex;
+  flex-direction: column;
+}
+
 
 /* =========================
    SIDEBAR
@@ -214,6 +244,7 @@ button {
 
 .sidebar {
   width: 255px;
+  flex: 1;
 
   flex-shrink: 0;
 
@@ -249,6 +280,7 @@ button {
 .brand-mark {
   width: 42px;
   height: 42px;
+  flex-shrink: 0;
 
   background: white;
   color: var(--jubilee-red);
@@ -260,6 +292,17 @@ button {
   justify-content: center;
 
   font-weight: 900;
+
+  overflow: hidden;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  border-radius: inherit;
 }
 
 .brand-name {
@@ -1419,6 +1462,10 @@ h1.page-title {
   }
 
   .sidebar-close {
+    display: block;
+  }
+
+  .app-shell {
     display: block;
   }
 
