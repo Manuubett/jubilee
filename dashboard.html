@@ -1,211 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-  <meta charset="UTF-8">
-
+  <meta charset="UTF-8" />
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
-  >
+  />
 
-  <title>Dashboard | Embu Membership Service</title>
+  <title>Dashboard | Jubilee Embu Membership Service System</title>
 
-  <link rel="stylesheet" href="css/style.css">
-
+  <link rel="stylesheet" href="./css/app.css" />
 </head>
 
 <body>
+  <!-- Shared application shell -->
+  <div id="app-shell"></div>
 
-  <div class="app">
-
-    <aside class="sidebar">
-
-      <div class="brand">
-
-        <div class="logo">E</div>
+  <!-- Main application -->
+  <main class="app-main">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          class="mobile-menu-btn"
+          id="mobileMenuBtn"
+          aria-label="Open navigation"
+        >
+          ☰
+        </button>
 
         <div>
-          <strong>Embu Service</strong>
-          <small>Office System</small>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">
+            Membership service activity for the Embu office
+          </p>
         </div>
-
       </div>
 
-      <nav>
+      <div class="topbar-right">
+        <div class="topbar-search">
+          <span class="search-icon">⌕</span>
+          <input
+            type="search"
+            id="globalSearch"
+            placeholder="Search cases..."
+            autocomplete="off"
+          />
+        </div>
 
-        <a class="active" href="dashboard.html">
-          Dashboard
-        </a>
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
 
-        <a href="#">
+          <div class="user-info">
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">OFFICER</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <section class="page-content">
+
+      <!-- Welcome / quick action -->
+      <div class="dashboard-header">
+        <div>
+          <h2>Good day</h2>
+          <p id="welcomeText">
+            Here is the current service activity.
+          </p>
+        </div>
+
+        <a
+          href="./new-case.html"
+          class="btn btn-primary"
+        >
+          <span>＋</span>
           New Service Case
         </a>
+      </div>
 
-        <a href="#">
-          Case List
-        </a>
+      <!-- Error message -->
+      <div
+        id="dashboardError"
+        class="alert alert-danger hidden"
+        role="alert"
+      ></div>
 
-        <a href="#">
-          Follow-ups
-        </a>
+      <!-- Loading -->
+      <div
+        id="dashboardLoading"
+        class="dashboard-loading"
+      >
+        <div class="loading-spinner"></div>
+        <span>Loading dashboard...</span>
+      </div>
 
-        <a href="#">
-          Reports
-        </a>
+      <!-- Statistics -->
+      <div
+        id="dashboardContent"
+        class="hidden"
+      >
 
-        <a href="#">
-          Users
-        </a>
+        <section class="stats-grid">
 
-        <a href="#">
-          Audit Log
-        </a>
+          <!-- Open cases -->
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <span class="stat-label">Open Cases</span>
+                <strong
+                  class="stat-value"
+                  id="openCasesCount"
+                >
+                  0
+                </strong>
+              </div>
 
-      </nav>
+              <div class="stat-icon stat-icon-red">
+                ▣
+              </div>
+            </div>
 
-      <button id="logoutBtn" class="logout-btn">
-        Sign Out
-      </button>
+            <div class="stat-footer">
+              <span id="openCasesText">
+                Currently requiring attention
+              </span>
+            </div>
+          </article>
 
-    </aside>
+          <!-- Pending follow-ups -->
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <span class="stat-label">Pending Follow-ups</span>
+                <strong
+                  class="stat-value"
+                  id="pendingFollowupsCount"
+                >
+                  0
+                </strong>
+              </div>
 
+              <div class="stat-icon stat-icon-warning">
+                ◷
+              </div>
+            </div>
 
-    <main class="main-content">
+            <div class="stat-footer">
+              <span id="followupsText">
+                Follow-ups requiring action
+              </span>
+            </div>
+          </article>
 
-      <header class="topbar">
+          <!-- Created today -->
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <span class="stat-label">Created Today</span>
+                <strong
+                  class="stat-value"
+                  id="createdTodayCount"
+                >
+                  0
+                </strong>
+              </div>
 
-        <div>
-          <h1>Dashboard</h1>
-          <p>Membership service and help-desk overview</p>
+              <div class="stat-icon stat-icon-info">
+                ＋
+              </div>
+            </div>
+
+            <div class="stat-footer">
+              <span>
+                New service cases
+              </span>
+            </div>
+          </article>
+
+          <!-- Resolved today -->
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <span class="stat-label">Resolved Today</span>
+                <strong
+                  class="stat-value"
+                  id="resolvedTodayCount"
+                >
+                  0
+                </strong>
+              </div>
+
+              <div class="stat-icon stat-icon-success">
+                ✓
+              </div>
+            </div>
+
+            <div class="stat-footer">
+              <span>
+                Cases resolved today
+              </span>
+            </div>
+          </article>
+
+        </section>
+
+        <!-- Main dashboard grid -->
+        <div class="dashboard-grid">
+
+          <!-- Recent cases -->
+          <section class="dashboard-panel panel-large">
+
+            <div class="panel-header">
+              <div>
+                <h3>Recent Service Cases</h3>
+                <p>
+                  Latest cases recorded by the office
+                </p>
+              </div>
+
+              <a
+                href="./cases.html"
+                class="panel-link"
+              >
+                View all
+              </a>
+            </div>
+
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Case Reference</th>
+                    <th>Applicant</th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+
+                <tbody id="recentCasesTable">
+                  <tr>
+                    <td
+                      colspan="6"
+                      class="table-empty"
+                    >
+                      Loading cases...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </section>
+
+          <!-- Follow-ups -->
+          <section class="dashboard-panel">
+
+            <div class="panel-header">
+              <div>
+                <h3>Follow-ups Due</h3>
+                <p>
+                  Pending follow-up work
+                </p>
+              </div>
+
+              <a
+                href="./followups.html"
+                class="panel-link"
+              >
+                View all
+              </a>
+            </div>
+
+            <div
+              id="followupsList"
+              class="followups-list"
+            >
+              <div class="list-loading">
+                Loading follow-ups...
+              </div>
+            </div>
+
+          </section>
+
         </div>
 
-        <div class="user-area">
+        <!-- Quick actions -->
+        <section class="dashboard-panel quick-actions-panel">
 
-          <span id="userName">
-            Loading...
-          </span>
-
-        </div>
-
-      </header>
-
-
-      <section class="prototype-warning">
-
-        <strong>Prototype / Demo Data</strong>
-
-        <span>
-          This system is an office workflow prototype.
-          It is not the authoritative membership register.
-        </span>
-
-      </section>
-
-
-      <section class="stats-grid">
-
-        <div class="stat-card">
-
-          <span>Open Cases</span>
-
-          <strong id="openCases">
-            0
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>Pending Follow-ups</span>
-
-          <strong id="pendingFollowups">
-            0
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>Cases Created Today</span>
-
-          <strong id="createdToday">
-            0
-          </strong>
-
-        </div>
-
-
-        <div class="stat-card">
-
-          <span>Cases Resolved Today</span>
-
-          <strong id="resolvedToday">
-            0
-          </strong>
-
-        </div>
-
-      </section>
-
-
-      <section class="content-card">
-
-        <div class="section-header">
-
-          <div>
-            <h2>Recent Cases</h2>
-            <p>Latest office service requests</p>
+          <div class="panel-header">
+            <div>
+              <h3>Quick Actions</h3>
+              <p>
+                Common office service tasks
+              </p>
+            </div>
           </div>
 
-          <button class="primary-btn small">
-            + New Case
-          </button>
+          <div class="quick-actions">
 
-        </div>
+            <a
+              href="./new-case.html"
+              class="quick-action"
+            >
+              <span class="quick-action-icon">
+                ＋
+              </span>
 
+              <span>
+                <strong>New Service Case</strong>
+                <small>
+                  Record a new service request
+                </small>
+              </span>
+            </a>
 
-        <div class="table-container">
+            <a
+              href="./cases.html"
+              class="quick-action"
+            >
+              <span class="quick-action-icon">
+                ▣
+              </span>
 
-          <table>
+              <span>
+                <strong>View Cases</strong>
+                <small>
+                  Search and manage service cases
+                </small>
+              </span>
+            </a>
 
-            <thead>
+            <a
+              href="./followups.html"
+              class="quick-action"
+            >
+              <span class="quick-action-icon">
+                ◷
+              </span>
 
-              <tr>
-                <th>Case Reference</th>
-                <th>Service</th>
-                <th>Status</th>
-                <th>Created</th>
-              </tr>
+              <span>
+                <strong>Follow-ups</strong>
+                <small>
+                  Review pending follow-up actions
+                </small>
+              </span>
+            </a>
 
-            </thead>
+            <a
+              href="./reports.html"
+              class="quick-action"
+            >
+              <span class="quick-action-icon">
+                ▤
+              </span>
 
-            <tbody id="recentCases">
+              <span>
+                <strong>Reports</strong>
+                <small>
+                  Review service activity reports
+                </small>
+              </span>
+            </a>
 
-              <tr>
-                <td colspan="4">
-                  No cases yet.
-                </td>
-              </tr>
+          </div>
 
-            </tbody>
+        </section>
 
-          </table>
+      </div>
+    </section>
+  </main>
 
-        </div>
-
-      </section>
-
-    </main>
-
-  </div>
-
-
-  <script type="module" src="js/dashboard.js"></script>
-
+  <!-- Dashboard application -->
+  <script
+    type="module"
+    src="./js/dashboard.js"
+  ></script>
 </body>
-
 </html>
