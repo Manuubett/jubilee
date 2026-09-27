@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>New Service Case | Jubilee Embu - Kangaru Membership Service System</title>
+
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+
+<body>
+  <div id="app-shell"></div>
+
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+
+        <div>
+          <h1 class="page-title">New Service Case</h1>
+          <p class="page-subtitle">Record a new membership service request</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">OFFICER</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+
+      <div
+        id="formError"
+        class="alert alert-danger hidden"
+        role="alert"
+      ></div>
+
+      <div
+        id="formSuccess"
+        class="alert alert-success hidden"
+        role="status"
+      ></div>
+
+      <section class="dashboard-panel">
+        <div class="panel-header">
+          <div>
+            <h3>Applicant &amp; Case Details</h3>
+            <p>Fields marked required must be filled before submitting</p>
+          </div>
+        </div>
+
+        <form id="newCaseForm" style="padding: 22px;">
+
+          <div class="form-section">
+            <h3>Applicant</h3>
+            <p>Who is this service case for?</p>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="applicantName">Full Name *</label>
+                <input
+                  type="text"
+                  id="applicantName"
+                  class="form-control"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="applicantPhone">Phone Number *</label>
+                <input
+                  type="tel"
+                  id="applicantPhone"
+                  class="form-control"
+                  placeholder="07XX XXX XXX"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="applicantIdNumber">National ID / Membership No.</label>
+                <input
+                  type="text"
+                  id="applicantIdNumber"
+                  class="form-control"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="applicantWard">Ward / Location</label>
+                <input
+                  type="text"
+                  id="applicantWard"
+                  class="form-control"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Case</h3>
+            <p>What is this case about, and how urgent is it?</p>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="serviceType">Service Type *</label>
+                <select id="serviceType" class="form-control" required>
+                  <option value="">Select a service...</option>
+                  <option value="MEMBERSHIP_REGISTRATION">Membership Registration</option>
+                  <option value="CARD_REPLACEMENT">Card Replacement</option>
+                  <option value="RECORD_UPDATE">Record Update</option>
+                  <option value="COMPLAINT">Complaint</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="priority">Priority *</label>
+                <select id="priority" class="form-control" required>
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM" selected>Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="URGENT">Urgent</option>
+                </select>
+              </div>
+
+              <div class="form-group form-grid-full">
+                <label for="description">Description *</label>
+                <textarea
+                  id="description"
+                  class="form-control"
+                  placeholder="Describe the request or issue in detail..."
+                  required
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              Create Case
+            </button>
+
+            <a href="./cases.html" class="btn btn-secondary">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+      </section>
+
+    </section>
+  </main>
+
+  <script type="module" src="./js/new-case.js"></script>
+</body>
+</html>
