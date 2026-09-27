@@ -631,4 +631,381 @@ td {
   .topbar {
     padding: 0 18px;
   }
+  /* =====================================================
+   CASES PAGE
+===================================================== */
+
+.page-heading-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.page-heading-row h2 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  color: var(--black);
+}
+
+.page-heading-row p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   FILTER PANEL
+===================================================== */
+
+.filter-panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 22px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.filter-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.filter-panel-header h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--black);
+}
+
+.filter-panel-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 2fr)
+    minmax(160px, 1fr)
+    minmax(190px, 1fr)
+    minmax(150px, 1fr);
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-group label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-control {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+
+  padding: 9px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: var(--white);
+  color: var(--text);
+
+  font: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.form-control:focus {
+  border-color: var(--jubilee-red);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(200, 16, 46, 0.08);
+}
+
+
+/* =====================================================
+   CASE TABLE
+===================================================== */
+
+.cases-panel {
+  overflow: hidden;
+}
+
+.cases-table {
+  min-width: 1000px;
+}
+
+.cases-table th {
+  white-space: nowrap;
+}
+
+.cases-table td {
+  vertical-align: middle;
+}
+
+.table-link {
+  color: var(--jubilee-red);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.table-link:hover {
+  text-decoration: underline;
+}
+
+.table-action-link {
+  color: var(--jubilee-red);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.table-action-link:hover {
+  text-decoration: underline;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+/* =====================================================
+   BADGES
+===================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 25px;
+
+  padding: 3px 9px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.badge-info {
+  background: #eff6ff;
+  color: var(--info);
+}
+
+.badge-success {
+  background: #ecfdf3;
+  color: var(--success);
+}
+
+.badge-warning {
+  background: #fff7ed;
+  color: var(--warning);
+}
+
+.badge-danger {
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.badge-neutral {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.table-loading {
+  min-height: 260px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 22px;
+  height: 22px;
+
+  border: 3px solid var(--border);
+  border-top-color: var(--jubilee-red);
+
+  border-radius: 50%;
+
+  animation: casesSpinner 0.8s linear infinite;
+}
+
+@keyframes casesSpinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 52px;
+  height: 52px;
+
+  margin: 0 auto 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--jubilee-red-light);
+  color: var(--jubilee-red);
+
+  font-size: 22px;
+}
+
+.empty-state h3 {
+  margin: 0 0 7px;
+  color: var(--black);
+}
+
+.empty-state p {
+  max-width: 450px;
+  margin: 0 auto 20px;
+
+  color: var(--muted);
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   PAGINATION
+===================================================== */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 18px 20px;
+
+  border-top: 1px solid var(--border);
+}
+
+.pagination-info {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-number {
+  min-width: 100px;
+  text-align: center;
+
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1000px) {
+
+  .filter-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+
+  .page-heading-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-heading-row .btn {
+    width: 100%;
+  }
+
+  .filter-panel-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-search {
+    grid-column: auto;
+  }
+
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination-buttons {
+    justify-content: space-between;
+  }
+
+  .table-actions {
+    width: 100%;
+  }
+
+  .table-actions .btn {
+    width: 100%;
+  }
+}
 }
