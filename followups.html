@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Follow-ups | Jubilee Embu - Kangaru Membership Service System</title>
+
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+
+<body>
+  <div id="app-shell"></div>
+
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+
+        <div>
+          <h1 class="page-title">Follow-ups</h1>
+          <p class="page-subtitle">Pending follow-up work across all cases</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">OFFICER</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+
+      <div class="page-heading-row">
+        <div>
+          <h2>Follow-ups Due</h2>
+          <p>Sorted by due date, soonest first</p>
+        </div>
+      </div>
+
+      <section class="filter-panel">
+        <div class="filter-panel-header">
+          <div>
+            <h3>Filter</h3>
+          </div>
+        </div>
+
+        <div class="filter-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+          <select id="filterStatus" class="form-control">
+            <option value="PENDING">Pending only</option>
+            <option value="OVERDUE">Overdue only</option>
+            <option value="DONE">Done only</option>
+            <option value="">All</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="dashboard-panel cases-panel">
+        <div class="table-wrapper">
+          <table class="data-table cases-table">
+            <thead>
+              <tr>
+                <th>Case Reference</th>
+                <th>Note</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="followupsTableBody">
+              <tr>
+                <td colspan="5">
+                  <div class="table-loading">
+                    <div class="loading-spinner"></div>
+                    <span>Loading follow-ups...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="followupsEmptyState" class="empty-state hidden">
+          <div class="empty-state-icon">◷</div>
+          <h3>Nothing due</h3>
+          <p>There are no follow-ups matching this filter.</p>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <script type="module" src="./js/followups.js"></script>
+</body>
+</html>
