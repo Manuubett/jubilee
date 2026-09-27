@@ -226,6 +226,39 @@ function renderSidebar(profile) {
 }
 
 /**
+ * Ensure the sidebar and main content share the ".app" flex
+ * container that app.css relies on for the side-by-side
+ * layout, and that the content column carries the ".main"
+ * class (the CSS defines ".main", but pages ship with
+ * "app-main"). Without this, "#app-shell" and "<main>" are
+ * plain block siblings and stack vertically instead of
+ * sitting next to each other.
+ */
+function ensureAppLayout(shell) {
+  const main = document.querySelector("main");
+
+  if (!main) {
+    return;
+  }
+
+  main.classList.add("main");
+
+  const alreadyWrapped =
+    shell.parentElement?.classList.contains("app");
+
+  if (alreadyWrapped) {
+    return;
+  }
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "app";
+
+  shell.parentElement.insertBefore(wrapper, shell);
+  wrapper.appendChild(shell);
+  wrapper.appendChild(main);
+}
+
+/**
  * Create the application shell.
  */
 function renderShell(profile) {
@@ -234,6 +267,8 @@ function renderShell(profile) {
   if (!shell) {
     return;
   }
+
+  ensureAppLayout(shell);
 
   shell.innerHTML = renderSidebar(profile);
 
