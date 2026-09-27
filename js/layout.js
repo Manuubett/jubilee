@@ -151,7 +151,7 @@ function renderSidebar(profile) {
 
         <div class="brand-mark">
           <img
-            src="./assets/jubilee-logo.png"
+            src="./assets/jubilee.png"
             alt="Jubilee Party logo"
           />
         </div>
