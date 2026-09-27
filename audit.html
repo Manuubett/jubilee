@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Audit Log | Jubilee Embu - Kangaru Membership Service System</title>
+
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+
+<body>
+  <div id="app-shell"></div>
+
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+
+        <div>
+          <h1 class="page-title">Audit Log</h1>
+          <p class="page-subtitle">A record of actions taken in this system</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">OFFICER</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+
+      <div class="page-heading-row">
+        <div>
+          <h2>Activity History</h2>
+          <p>Most recent actions first</p>
+        </div>
+      </div>
+
+      <section class="filter-panel">
+        <div class="filter-panel-header">
+          <div>
+            <h3>Filter</h3>
+          </div>
+        </div>
+
+        <div class="filter-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+          <input
+            type="search"
+            id="filterActor"
+            class="form-control"
+            placeholder="Filter by user name or email..."
+          />
+
+          <select id="filterAction" class="form-control">
+            <option value="">All Actions</option>
+            <option value="CASE_CREATED">Case Created</option>
+            <option value="CASE_UPDATED">Case Updated</option>
+            <option value="FOLLOWUP_ADDED">Follow-up Added</option>
+            <option value="FOLLOWUP_COMPLETED">Follow-up Completed</option>
+            <option value="USER_ROLE_CHANGED">User Role Changed</option>
+            <option value="USER_STATUS_CHANGED">User Status Changed</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="dashboard-panel cases-panel">
+        <div class="table-wrapper">
+          <table class="data-table cases-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody">
+              <tr>
+                <td colspan="5">
+                  <div class="table-loading">
+                    <div class="loading-spinner"></div>
+                    <span>Loading audit log...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="auditEmptyState" class="empty-state hidden">
+          <div class="empty-state-icon">◉</div>
+          <h3>No matching activity</h3>
+          <p>Try clearing a filter.</p>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <script type="module" src="./js/audit.js"></script>
+</body>
+</html>
