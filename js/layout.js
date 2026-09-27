@@ -106,6 +106,13 @@ function isActivePage(href) {
 
 /**
  * Build the sidebar.
+ *
+ * NOTE: class names here must match the selectors defined in
+ * css/app.css (.sidebar, .brand, .brand-mark, .brand-name,
+ * .brand-subtitle, .office-label, .nav, .nav-link, .nav-icon,
+ * .sidebar-footer, .user-menu, .avatar, .user-info, .user-name,
+ * .user-role). Previously this used a different, unstyled
+ * class vocabulary (.sidebar-brand, .sidebar-link, etc.).
  */
 function renderSidebar(profile) {
   const role = profile?.role || "OFFICER";
@@ -120,14 +127,14 @@ function renderSidebar(profile) {
       return `
         <a
           href="${item.href}"
-          class="sidebar-link ${activeClass}"
+          class="nav-link ${activeClass}"
           data-nav-item="${item.label}"
         >
-          <span class="sidebar-link-icon">
+          <span class="nav-icon">
             ${item.icon}
           </span>
 
-          <span class="sidebar-link-label">
+          <span>
             ${item.label}
           </span>
         </a>
@@ -140,15 +147,15 @@ function renderSidebar(profile) {
       class="sidebar"
       id="sidebar"
     >
-      <div class="sidebar-brand">
+      <div class="brand">
 
         <div class="brand-mark">
           J
         </div>
 
-        <div class="brand-text">
-          <strong>JUBILEE</strong>
-          <span>EMBU OFFICE</span>
+        <div>
+          <strong class="brand-name">JUBILEE</strong>
+          <span class="brand-subtitle">EMBU OFFICE</span>
         </div>
 
         <button
@@ -162,31 +169,37 @@ function renderSidebar(profile) {
 
       </div>
 
-      <div class="sidebar-section-label">
+      <div class="office-label">
         OFFICE SYSTEM
       </div>
 
-      <nav class="sidebar-nav">
+      <nav class="nav">
         ${navigation}
       </nav>
 
-      <div class="sidebar-bottom">
+      <div class="sidebar-footer">
 
-        <div class="sidebar-user">
+        <div class="user-menu">
 
           <div
-            class="user-avatar sidebar-avatar"
+            class="avatar"
             id="sidebarUserAvatar"
           >
             U
           </div>
 
-          <div class="sidebar-user-info">
-            <strong id="sidebarUserName">
+          <div class="user-info">
+            <strong
+              id="sidebarUserName"
+              class="user-name"
+            >
               User
             </strong>
 
-            <span id="sidebarUserRole">
+            <span
+              id="sidebarUserRole"
+              class="user-role"
+            >
               ${formatRole(role)}
             </span>
           </div>
@@ -230,6 +243,12 @@ function renderShell(profile) {
 
 /**
  * Update user information displayed by the shell.
+ *
+ * Also patches the topbar avatar/name/role elements in
+ * dashboard.html (and other pages) with the CSS classes
+ * they need (.avatar / .user-name / .user-role), since the
+ * markup ships with a mismatched class (.user-avatar) and
+ * no class at all on the name/role elements.
  */
 function updateUserDetails(profile) {
   const displayName =
@@ -266,14 +285,17 @@ function updateUserDetails(profile) {
 
   if (topbarUserName) {
     topbarUserName.textContent = displayName;
+    topbarUserName.classList.add("user-name");
   }
 
   if (topbarUserRole) {
     topbarUserRole.textContent = formatRole(role);
+    topbarUserRole.classList.add("user-role");
   }
 
   if (topbarAvatar) {
     topbarAvatar.textContent = initials;
+    topbarAvatar.classList.add("avatar");
   }
 
   if (sidebarUserName) {
@@ -366,7 +388,7 @@ function bindSidebarEvents() {
   );
 
   document
-    .querySelectorAll(".sidebar-link")
+    .querySelectorAll(".nav-link")
     .forEach(link => {
       link.addEventListener(
         "click",
