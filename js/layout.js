@@ -150,12 +150,15 @@ function renderSidebar(profile) {
       <div class="brand">
 
         <div class="brand-mark">
-          J
+          <img
+            src="./assets/jubilee-logo.png"
+            alt="Jubilee Party logo"
+          />
         </div>
 
         <div>
           <strong class="brand-name">JUBILEE</strong>
-          <span class="brand-subtitle">EMBU OFFICE</span>
+          <span class="brand-subtitle">EMBU - KANGARU OFFICE</span>
         </div>
 
         <button
@@ -270,6 +273,20 @@ function renderShell(profile) {
 
   ensureAppLayout(shell);
 
+  // #app-shell is the flex item that gets stretched to the
+  // row's full height by .app { display: flex }. The <aside
+  // class="sidebar"> we're about to inject is just a normal
+  // block element sitting inside it, so it only grows to fit
+  // its own nav links -- it does NOT automatically inherit
+  // the shell's stretched height. That's why the red sidebar
+  // background was ending early while the main content kept
+  // going below it. Making the shell itself a full-height
+  // flex column fixes it: the .sidebar child (with no
+  // sibling) then stretches to fill it, matching main's
+  // height exactly. (See the matching #app-shell rule added
+  // to css/app.css.)
+  shell.classList.add("app-shell");
+
   shell.innerHTML = renderSidebar(profile);
 
   updateUserDetails(profile);
@@ -347,7 +364,7 @@ function updateUserDetails(profile) {
 
   if (welcomeText) {
     welcomeText.textContent =
-      `Here is the current service activity for the Embu office.`;
+      `Here is the current service activity for the Embu - Kangaru office.`;
   }
 }
 
