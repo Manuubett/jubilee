@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Settings | Jubilee Embu - Kangaru Membership Service System</title>
+
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+
+<body>
+  <div id="app-shell"></div>
+
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+
+        <div>
+          <h1 class="page-title">Settings</h1>
+          <p class="page-subtitle">Office details and account settings</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">OFFICER</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+
+      <div id="pageError" class="alert alert-danger hidden" role="alert"></div>
+      <div id="pageSuccess" class="alert alert-success hidden" role="status"></div>
+
+      <!-- Office details -->
+      <section class="dashboard-panel" style="margin-bottom: 22px;">
+        <div class="panel-header">
+          <div>
+            <h3>Office Details</h3>
+            <p>Shown across the system and used on generated reports</p>
+          </div>
+        </div>
+
+        <div style="padding: 22px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="officeName">Office Name</label>
+              <input type="text" id="officeName" class="form-control" value="Jubilee Party — Embu - Kangaru Office" />
+            </div>
+
+            <div class="form-group">
+              <label for="officePhone">Contact Phone</label>
+              <input type="tel" id="officePhone" class="form-control" />
+            </div>
+
+            <div class="form-group form-grid-full">
+              <label for="officeAddress">Physical Address</label>
+              <input type="text" id="officeAddress" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="saveOfficeBtn">
+              Save Office Details
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Account -->
+      <section class="dashboard-panel">
+        <div class="panel-header">
+          <div>
+            <h3>Your Account</h3>
+            <p>Update the password for your own login</p>
+          </div>
+        </div>
+
+        <div style="padding: 22px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" class="form-control" minlength="8" />
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirm New Password</label>
+              <input type="password" id="confirmPassword" class="form-control" minlength="8" />
+            </div>
+          </div>
+
+          <p style="color: var(--muted); font-size: 12px; margin: 4px 0 16px;">
+            You may be asked to sign in again before this takes effect,
+            since Firebase requires a recent login to change a password.
+          </p>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="savePasswordBtn">
+              Update Password
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <script type="module" src="./js/settings.js"></script>
+</body>
+</html>
