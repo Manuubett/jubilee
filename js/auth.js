@@ -10,80 +10,87 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const loginForm = document.getElementById("loginForm");
-const loginMessage = document.getElementById("loginMessage");
 
-loginForm.addEventListener("submit", async (event) => {
+const form =
+  document.getElementById("loginForm");
+
+const errorBox =
+  document.getElementById("loginError");
+
+
+form.addEventListener("submit", async (event) => {
 
   event.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  errorBox.textContent = "";
 
-  loginMessage.textContent = "Signing in...";
+  const email =
+    document
+      .getElementById("email")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("password")
+      .value;
+
 
   try {
 
-    const credential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const credential =
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
-    const user = credential.user;
 
-    const userRef = doc(db, "users", user.uid);
+    const uid =
+      credential.user.uid;
 
-    const userSnap = await getDoc(userRef);
 
-    if (!userSnap.exists()) {
+    const userSnapshot =
+      await getDoc(
+        doc(db, "users", uid)
+      );
 
-      loginMessage.textContent =
-        "Your account exists, but your office profile has not been configured.";
 
-      return;
+    if (!userSnapshot.exists()) {
+
+      await auth.signOut();
+
+      throw new Error(
+        "Your staff profile has not been configured."
+      );
     }
 
-    const userData = userSnap.data();
 
-    if (userData.active !== true) {
+    const profile =
+      userSnapshot.data();
 
-      loginMessage.textContent =
-        "This account has been deactivated.";
 
-      return;
+    if (profile.active !== true) {
+
+      await auth.signOut();
+
+      throw new Error(
+        "This staff account is inactive."
+      );
     }
 
-    window.location.href = "dashboard.html";
+
+    window.location.href =
+      "dashboard.html";
+
 
   } catch (error) {
 
     console.error(error);
 
-    switch (error.code) {
-
-      case "auth/invalid-credential":
-        loginMessage.textContent =
-          "Incorrect email or password.";
-        break;
-
-      case "auth/too-many-requests":
-        loginMessage.textContent =
-          "Too many attempts. Please try again later.";
-        break;
-
-      default:
-        loginMessage.textContent =
-          "Unable to sign in. Please try again.";
-    }
-  }
-});
-
-
-onAuthStateChanged(auth, (user) => {
-
-  if (user && window.location.pathname.endsWith("index.html")) {
-    // Optional: redirect already authenticated users
+    errorBox.textContent =
+      error.message ||
+      "Unable to sign in.";
   }
 
 });
