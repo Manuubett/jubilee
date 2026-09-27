@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Users | Jubilee Embu - Kangaru Membership Service System</title>
+
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+
+<body>
+  <div id="app-shell"></div>
+
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+
+        <div>
+          <h1 class="page-title">Users</h1>
+          <p class="page-subtitle">People with access to this office system</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">OFFICER</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+
+      <div id="pageError" class="alert alert-danger hidden" role="alert"></div>
+      <div id="pageSuccess" class="alert alert-success hidden" role="status"></div>
+
+      <div class="page-heading-row">
+        <div>
+          <h2>Office Users</h2>
+          <p>Manage roles and access for this office</p>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="openInviteBtn">
+          ＋ Invite User
+        </button>
+      </div>
+
+      <!-- Invite form (hidden until "Invite User" is clicked) -->
+      <section class="dashboard-panel hidden" id="invitePanel" style="margin-bottom: 22px;">
+        <div class="panel-header">
+          <div>
+            <h3>Invite a New User</h3>
+            <p>
+              This records the person's details and role. They'll still need
+              to sign in once with this email so their account can be linked
+              -- see the note below the form.
+            </p>
+          </div>
+        </div>
+
+        <div style="padding: 22px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="inviteName">Full Name *</label>
+              <input type="text" id="inviteName" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+              <label for="inviteEmail">Email Address *</label>
+              <input type="email" id="inviteEmail" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+              <label for="inviteRole">Role *</label>
+              <select id="inviteRole" class="form-control">
+                <option value="OFFICER">Officer</option>
+                <option value="SUPERVISOR">Supervisor</option>
+                <option value="REPORT_VIEWER">Report Viewer</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+          </div>
+
+          <p style="color: var(--muted); font-size: 12px; margin: 4px 0 16px;">
+            Note: creating the sign-in credentials themselves requires an
+            admin backend step (Firebase Admin SDK / Cloud Function) --
+            this form only records the person's role ahead of time so it's
+            ready the moment they log in.
+          </p>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="saveInviteBtn">
+              Save User
+            </button>
+            <button type="button" class="btn btn-secondary" id="cancelInviteBtn">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-panel cases-panel">
+        <div class="table-wrapper">
+          <table class="data-table cases-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="5">
+                  <div class="table-loading">
+                    <div class="loading-spinner"></div>
+                    <span>Loading users...</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <script type="module" src="./js/users.js"></script>
+</body>
+</html>
