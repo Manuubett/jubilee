@@ -178,6 +178,59 @@ button {
     0 0 0 3px rgba(200, 16, 46, 0.10);
 }
 
+textarea.form-control {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.form-grid-full {
+  grid-column: 1 / -1;
+}
+
+.form-section {
+  margin-bottom: 26px;
+}
+
+.form-section h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.form-section p {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-secondary {
+  background: var(--background);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: #eceef0;
+}
+
+.alert-success {
+  background: #ecfdf3;
+  color: var(--success);
+  border: 1px solid #bbf7d0;
+}
+
 .btn-primary {
   border: none;
 
