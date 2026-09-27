@@ -594,44 +594,7 @@ td {
 }
 
 
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 900px) {
-
-  .sidebar {
-    width: 210px;
-  }
-
-  .stats {
-    grid-template-columns:
-      repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 650px) {
-
-  .app {
-    display: block;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-
-  .stats {
-    grid-template-columns: 1fr;
-  }
-
-  .content {
-    padding: 18px;
-  }
-
-  .topbar {
-    padding: 0 18px;
-  }
-  /* =====================================================
+/* =====================================================
    CASES PAGE
 ===================================================== */
 
@@ -697,18 +660,6 @@ td {
     minmax(190px, 1fr)
     minmax(150px, 1fr);
   gap: 16px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.form-group label {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
 }
 
 .form-control {
@@ -792,25 +743,8 @@ td {
 
 
 /* =====================================================
-   BADGES
+   BADGES (cases page variants)
 ===================================================== */
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  min-height: 25px;
-
-  padding: 3px 9px;
-
-  border-radius: 999px;
-
-  font-size: 11px;
-  font-weight: 700;
-
-  white-space: nowrap;
-}
 
 .badge-info {
   background: #eff6ff;
@@ -951,8 +885,48 @@ td {
 }
 
 
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 900px) {
+
+  .sidebar {
+    width: 210px;
+  }
+
+  .stats {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+
+  .app {
+    display: block;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    padding: 18px;
+  }
+
+  .topbar {
+    padding: 0 18px;
+  }
+}
+
+
 /* =====================================================
-   RESPONSIVE
+   RESPONSIVE (cases page)
 ===================================================== */
 
 @media (max-width: 1000px) {
@@ -1007,5 +981,4 @@ td {
   .table-actions .btn {
     width: 100%;
   }
-}
 }
