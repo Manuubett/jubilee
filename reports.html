@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Reports | Jubilee Embu - Kangaru Membership Service System</title>
+
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+
+<body>
+  <div id="app-shell"></div>
+
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+
+        <div>
+          <h1 class="page-title">Reports</h1>
+          <p class="page-subtitle">Service activity for the Embu - Kangaru office</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">OFFICER</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+
+      <div id="reportsLoading" class="dashboard-loading">
+        <div class="loading-spinner"></div>
+        <span>Crunching numbers...</span>
+      </div>
+
+      <div id="reportsContent" class="hidden">
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <span class="stat-label">Total Cases</span>
+                <strong class="stat-value" id="totalCasesCount">0</strong>
+              </div>
+              <div class="stat-icon stat-icon-red">▣</div>
+            </div>
+            <div class="stat-footer">All time, this office</div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <span class="stat-label">Resolved / Closed</span>
+                <strong class="stat-value" id="resolvedCasesCount">0</strong>
+              </div>
+              <div class="stat-icon stat-icon-success">✓</div>
+            </div>
+            <div class="stat-footer">Cases completed</div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <span class="stat-label">Still Open</span>
+                <strong class="stat-value" id="openCasesCount">0</strong>
+              </div>
+              <div class="stat-icon stat-icon-warning">◷</div>
+            </div>
+            <div class="stat-footer">New, in progress or waiting</div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <div>
+                <span class="stat-label">Urgent Priority</span>
+                <strong class="stat-value" id="urgentCasesCount">0</strong>
+              </div>
+              <div class="stat-icon stat-icon-info">!</div>
+            </div>
+            <div class="stat-footer">Currently open and urgent</div>
+          </article>
+        </section>
+
+        <div class="dashboard-grid">
+
+          <section class="dashboard-panel">
+            <div class="panel-header">
+              <div>
+                <h3>Cases by Status</h3>
+              </div>
+            </div>
+            <div style="padding: 22px;" id="statusBreakdown"></div>
+          </section>
+
+          <section class="dashboard-panel">
+            <div class="panel-header">
+              <div>
+                <h3>Cases by Service Type</h3>
+              </div>
+            </div>
+            <div style="padding: 22px;" id="serviceBreakdown"></div>
+          </section>
+
+        </div>
+
+      </div>
+
+    </section>
+  </main>
+
+  <script type="module" src="./js/reports.js"></script>
+</body>
+</html>
