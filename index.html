@@ -1,65 +1,105 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Embu Membership Service System</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  <link rel="stylesheet" href="styles.css">
+  <title>Jubilee Embu — Membership Service</title>
+
+  <link
+    rel="stylesheet"
+    href="css/app.css"
+  >
+
 </head>
 
 <body class="login-page">
 
   <div class="login-card">
 
-    <div class="logo-area">
-      <div class="logo">E</div>
+    <div class="login-brand">
 
-      <h1>Embu Membership Service</h1>
+      <div class="jubilee-mark">
+        J
+      </div>
 
-      <p>Office Help-Desk System</p>
+      <h1>
+        Membership Service
+      </h1>
 
-      <span class="prototype-badge">
-        PROTOTYPE / DEMO
-      </span>
+      <p>
+        Embu Office
+      </p>
+
     </div>
+
 
     <form id="loginForm">
 
       <div class="form-group">
-        <label for="email">Email</label>
+
+        <label for="email">
+          Staff Email
+        </label>
 
         <input
-          type="email"
           id="email"
-          placeholder="staff@example.com"
+          class="form-control"
+          type="email"
+          autocomplete="username"
           required
         >
+
       </div>
+
 
       <div class="form-group">
-        <label for="password">Password</label>
+
+        <label for="password">
+          Password
+        </label>
 
         <input
-          type="password"
           id="password"
-          placeholder="Enter password"
+          class="form-control"
+          type="password"
+          autocomplete="current-password"
           required
         >
+
       </div>
 
-      <button type="submit" class="primary-btn">
+
+      <button
+        class="btn-primary btn-block"
+        type="submit"
+      >
         Sign In
       </button>
 
-      <p id="loginMessage" class="message"></p>
+
+      <div
+        id="loginError"
+        class="login-error"
+      ></div>
 
     </form>
 
   </div>
 
-  <script type="module" src="js/auth.js"></script>
+
+  <script
+    type="module"
+    src="js/auth.js"
+  ></script>
 
 </body>
+
 </html>
