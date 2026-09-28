@@ -190,7 +190,7 @@ async function loadFollowups(caseId, currentUser, reference) {
   const tbody = document.getElementById("followupsTableBody");
 
   const followupsQuery = query(
-    collection(db, "followups"),
+    collection(db, "followUps"),
     where("caseId", "==", caseId),
     orderBy("dueDate", "asc")
   );
@@ -221,7 +221,7 @@ async function loadFollowups(caseId, currentUser, reference) {
 
 async function markFollowupDone(followupId, currentUser, caseId, reference) {
   try {
-    await updateDoc(doc(db, "followups", followupId), {
+    await updateDoc(doc(db, "followUps", followupId), {
       status: "DONE",
       completedAt: serverTimestamp()
     });
@@ -254,7 +254,7 @@ async function addFollowup(caseId, caseReference, currentUser) {
   addBtn.textContent = "Adding...";
 
   try {
-    const followupRef = await addDoc(collection(db, "followups"), {
+    const followupRef = await addDoc(collection(db, "followUps"), {
       caseId,
       caseReference: caseReference || caseId,
       note,
