@@ -115,6 +115,32 @@
 
         </div>
 
+        <!-- ORPP tracking (membership registration / resignation only) -->
+        <section class="dashboard-panel hidden" id="trackingPanel" style="margin-bottom: 22px;">
+          <div class="panel-header">
+            <div>
+              <h3 id="trackingTitle">ORPP tracking</h3>
+              <p id="trackingSubtitle"></p>
+            </div>
+          </div>
+
+          <div style="padding: 22px;">
+            <div class="form-grid" id="trackingFields"></div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" id="saveTrackingBtn">
+                Save Tracking
+              </button>
+
+              <span
+                id="trackingSavedMessage"
+                class="hidden"
+                style="color: var(--success); font-size: 13px;"
+              >Saved.</span>
+            </div>
+          </div>
+        </section>
+
         <!-- Follow-ups -->
         <section class="dashboard-panel">
           <div class="panel-header">
