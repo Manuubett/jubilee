@@ -151,7 +151,7 @@ function renderSidebar(profile) {
 
         <div class="brand-mark">
           <img
-            src="./assets/jubilee.png"
+            src="./assets/jubilee-logo.png"
             alt="Jubilee Party logo"
           />
         </div>
@@ -503,8 +503,9 @@ async function getUserProfile(user) {
           user.email ||
           "User",
         email: user.email || "",
-        role: "OFFICER",
-        active: true
+        role: "PENDING",
+        active: false,
+        missing: true
       };
     }
 
@@ -553,6 +554,37 @@ export function initLayout() {
 
         const profile =
           await getUserProfile(user);
+
+        const isPending =
+          profile?.missing === true ||
+          profile?.role === "PENDING";
+
+        if (isPending) {
+          await signOut(auth);
+
+          window.alert(
+            "Your access request is still waiting for administrator approval. " +
+            "You will be able to sign in once you are approved."
+          );
+
+          window.location.href =
+            "./index.html";
+
+          return;
+        }
+
+        if (profile?.role === "DECLINED") {
+          await signOut(auth);
+
+          window.alert(
+            "Your access request was not approved. Please contact an administrator."
+          );
+
+          window.location.href =
+            "./index.html";
+
+          return;
+        }
 
         if (
           profile &&
