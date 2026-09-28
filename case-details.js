@@ -31,6 +31,9 @@ function getCaseId() {
   return params.get("id");
 }
 
+// Status as last loaded/saved, used to detect a change to RESOLVED.
+let loadedStatus = null;
+
 function formatDate(timestamp) {
   if (!timestamp?.toDate) {
     return "—";
@@ -95,6 +98,7 @@ async function loadCase(caseId) {
 
   document.getElementById("statusSelect").value = data.status || "NEW";
   document.getElementById("prioritySelect").value = data.priority || "MEDIUM";
+  loadedStatus = data.status || "NEW";
 
   renderCaseInfo(data);
 
@@ -115,11 +119,22 @@ async function saveStatus(caseId, currentUser, reference) {
   saveBtn.textContent = "Saving...";
 
   try {
-    await updateDoc(doc(db, "cases", caseId), {
+    const updates = {
       status,
       priority,
       updatedAt: serverTimestamp()
-    });
+    };
+
+    // The dashboard's "Resolved Today" count uses resolvedAt.
+    if (status === "RESOLVED" && loadedStatus !== "RESOLVED") {
+      updates.resolvedAt = serverTimestamp();
+    } else if (status !== "RESOLVED" && status !== "CLOSED") {
+      updates.resolvedAt = null;
+    }
+
+    await updateDoc(doc(db, "cases", caseId), updates);
+
+    loadedStatus = status;
 
     logAudit(currentUser, "CASE_UPDATED", {
       targetType: "case",
