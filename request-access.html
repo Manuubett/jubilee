@@ -60,6 +60,15 @@
       margin-bottom: 26px;
     }
 
+    .logo-img {
+      display: block;
+      width: auto;
+      max-width: 220px;
+      height: 90px;
+      margin: 0 auto 14px;
+      object-fit: contain;
+    }
+
     .logo {
       width: 72px;
       height: 72px;
@@ -234,13 +243,12 @@
   <div class="card">
 
     <div class="brand">
-      <div class="logo">
-        <img
-          src="./assets/jubilee-logo.png"
-          alt="Jubilee Party logo"
-          onerror="this.replaceWith(document.createTextNode('J'))"
-        />
-      </div>
+      <img
+        class="logo-img"
+        src="./assets/jubilee-logo.png"
+        alt="Jubilee Party logo"
+        onerror="this.style.display='none'"
+      />
 
       <h1>Request Access</h1>
       <p>Jubilee Embu - Kangaru Office</p>
