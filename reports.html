@@ -43,6 +43,46 @@
 
       <div id="reportsContent" class="hidden">
 
+        <!-- Period + export -->
+        <section class="filter-panel">
+          <div class="filter-panel-header">
+            <div>
+              <h3>Reporting period</h3>
+              <p>
+                Based on the date each case was created. Leave both dates empty
+                for all time.
+              </p>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="exportCsvBtn">
+              ⬇ Export CSV
+            </button>
+          </div>
+
+          <div class="filter-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+            <div class="form-group" style="margin: 0;">
+              <label for="fromDate">From</label>
+              <input type="date" id="fromDate" class="form-control" />
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label for="toDate">To</label>
+              <input type="date" id="toDate" class="form-control" />
+            </div>
+
+            <div class="form-group" style="margin: 0; display: flex; align-items: flex-end;">
+              <button type="button" class="btn btn-secondary" id="clearDatesBtn">
+                Clear dates
+              </button>
+            </div>
+          </div>
+
+          <p style="margin: 14px 0 0; color: var(--muted); font-size: 12px;">
+            The export contains no names, phone numbers or ID numbers, only
+            reference, service, status, dates and ORPP tracking.
+          </p>
+        </section>
+
         <section class="stats-grid">
           <article class="stat-card">
             <div class="stat-card-top">
@@ -52,7 +92,7 @@
               </div>
               <div class="stat-icon stat-icon-red">▣</div>
             </div>
-            <div class="stat-footer">All time, this office</div>
+            <div class="stat-footer" id="periodText">All time, this office</div>
           </article>
 
           <article class="stat-card">
@@ -89,6 +129,21 @@
           </article>
         </section>
 
+        <!-- ORPP compliance summary -->
+        <section class="dashboard-panel" style="margin-bottom: 22px;">
+          <div class="panel-header">
+            <div>
+              <h3>ORPP compliance summary</h3>
+              <p>
+                Membership registrations and resignations handled by this
+                office. The official register is kept in IPPMS.
+              </p>
+            </div>
+          </div>
+
+          <div class="stats-grid" style="padding: 22px 22px 4px; margin-bottom: 0;" id="complianceGrid"></div>
+        </section>
+
         <div class="dashboard-grid">
 
           <section class="dashboard-panel">
@@ -116,6 +171,6 @@
     </section>
   </main>
 
-  <script type="module" src="reports.js"></script>
+  <script type="module" src="./js/reports.js"></script>
 </body>
 </html>
