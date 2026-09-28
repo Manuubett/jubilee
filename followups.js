@@ -13,6 +13,7 @@ import {
 
 import { db } from "./firebase.js";
 import { requireRole } from "./layout.js";
+import { esc } from "./utils.js";
 
 // Fetched once and re-filtered locally when the dropdown
 // changes, rather than re-querying Firestore every time --
@@ -54,11 +55,11 @@ function renderRow(docSnap) {
   return `
     <tr>
       <td>
-        <a href="./case-details.html?id=${data.caseId}" class="table-link">
-          ${data.caseReference || data.caseId}
+        <a href="./case-details.html?id=${esc(data.caseId)}" class="table-link">
+          ${esc(data.caseReference || data.caseId)}
         </a>
       </td>
-      <td>${data.note || "—"}</td>
+      <td>${esc(data.note || "—")}</td>
       <td>${formatDate(dueDate)}</td>
       <td><span class="badge ${statusClass}">${statusLabel}</span></td>
       <td class="table-actions">
