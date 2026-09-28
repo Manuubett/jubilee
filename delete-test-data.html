@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Delete Test Data | Jubilee Embu - Kangaru Membership Service System</title>
+
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+
+<body>
+  <div id="app-shell"></div>
+
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+
+        <div>
+          <h1 class="page-title">Delete Test Data</h1>
+          <p class="page-subtitle">Admin-only cleanup tool</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">ADMIN</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+
+      <div class="alert alert-danger" role="alert">
+        <strong>Deleting is permanent.</strong> There is no undo. Use the
+        cutoff date below if you only want to remove records created before
+        you went live.
+      </div>
+
+      <div id="pageError" class="alert alert-danger hidden" role="alert"></div>
+      <div id="pageSuccess" class="alert alert-success hidden" role="status"></div>
+
+      <section class="dashboard-panel" style="margin-bottom: 22px;">
+        <div class="panel-header">
+          <div>
+            <h3>1. Choose what to delete</h3>
+            <p>User accounts are never touched by this page</p>
+          </div>
+
+          <a href="#" class="panel-link" id="refreshCountsLink">Refresh counts</a>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">Delete?</th>
+                <th>Collection</th>
+                <th>Records</th>
+              </tr>
+            </thead>
+            <tbody id="targetsBody">
+              <tr>
+                <td colspan="3" class="table-empty">Counting records...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="dashboard-panel" style="margin-bottom: 22px;">
+        <div class="panel-header">
+          <div>
+            <h3>2. Optional cutoff</h3>
+            <p>Only delete records created <em>before</em> this date and time. Leave empty to delete everything in the selected collections.</p>
+          </div>
+        </div>
+
+        <div style="padding: 22px; max-width: 360px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="cutoff">Created before</label>
+            <input type="datetime-local" id="cutoff" class="form-control" />
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-panel">
+        <div class="panel-header">
+          <div>
+            <h3>3. Confirm</h3>
+            <p>Type <strong>DELETE</strong> to enable the button</p>
+          </div>
+        </div>
+
+        <div style="padding: 22px; max-width: 360px;">
+          <div class="form-group">
+            <label for="confirmText">Confirmation</label>
+            <input type="text" id="confirmText" class="form-control" placeholder="DELETE" autocomplete="off" />
+          </div>
+
+          <button type="button" class="btn btn-primary" id="purgeBtn" disabled>
+            Delete Selected Data
+          </button>
+
+          <p id="progressText" style="margin-top: 14px; color: var(--muted); font-size: 13px;"></p>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <script type="module" src="./js/delete-test-data.js"></script>
+</body>
+</html>
