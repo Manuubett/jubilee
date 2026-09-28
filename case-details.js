@@ -17,11 +17,13 @@ import {
 import { db } from "./firebase.js";
 import { requireRole } from "./layout.js";
 import { logAudit } from "./audit-log.js";
+import { esc } from "./utils.js";
 
 const SERVICE_LABELS = {
   MEMBERSHIP_REGISTRATION: "Membership Registration",
   CARD_REPLACEMENT: "Card Replacement",
   RECORD_UPDATE: "Record Update",
+  RESIGNATION: "Membership Resignation",
   COMPLAINT: "Complaint",
   OTHER: "Other"
 };
@@ -58,19 +60,24 @@ function renderCaseInfo(data) {
   const rows = [
     ["Applicant Name", data.applicantName || "—"],
     ["Phone Number", data.applicantPhone || "—"],
-    ["National ID / Membership No.", data.applicantIdNumber || "—"],
+    ["National ID / Passport No.", data.applicantIdNumber || "—"],
     ["Ward / Location", data.applicantWard || "—"],
     ["Service Type", SERVICE_LABELS[data.service] || data.service || "—"],
-    ["Description", data.description || "—"]
+    ["Description", data.description || "—"],
+    ["Consent recorded", data.consentGiven ? "Yes — recorded at intake" : "Not recorded (older case)"]
   ];
+
+  if (data.eligibility) {
+    rows.push(["Eligibility confirmed", "Kenyan citizen, registered voter, no other party"]);
+  }
 
   grid.innerHTML = rows.map(([label, value]) => `
     <div style="margin-bottom: 16px;">
       <div style="font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;">
         ${label}
       </div>
-      <div style="font-size: 14px; color: var(--text);">
-        ${value}
+      <div style="font-size: 14px; color: var(--text); white-space: pre-wrap;">
+        ${esc(value)}
       </div>
     </div>
   `).join("");
@@ -173,7 +180,7 @@ function renderFollowupRow(docSnap) {
 
   return `
     <tr>
-      <td>${data.note || "—"}</td>
+      <td>${esc(data.note || "—")}</td>
       <td>${dueDate ? dueDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</td>
       <td><span class="badge ${statusClass}">${statusLabel}</span></td>
       <td class="table-actions">
@@ -285,6 +292,158 @@ async function addFollowup(caseId, caseReference, currentUser) {
   }
 }
 
+// ---------------------------------------------------------------
+// ORPP tracking panel
+// ---------------------------------------------------------------
+
+const IPPMS_STATUS_LABELS = {
+  NOT_SUBMITTED: "Not yet submitted to IPPMS",
+  SUBMITTED: "Submitted to IPPMS",
+  VERIFIED: "Verified by the Registrar",
+  CONSENT_RECEIVED: "Member consent received (registration complete)",
+  REJECTED: "Rejected / needs correction"
+};
+
+function renderTracking(caseId, data, currentUser) {
+  const isRegistration = data.service === "MEMBERSHIP_REGISTRATION";
+  const isResignation = data.service === "RESIGNATION";
+
+  if (!isRegistration && !isResignation) {
+    return;
+  }
+
+  const panel = document.getElementById("trackingPanel");
+  const fields = document.getElementById("trackingFields");
+
+  panel.classList.remove("hidden");
+
+  if (isRegistration) {
+    document.getElementById("trackingTitle").textContent = "Membership registration tracking";
+    document.getElementById("trackingSubtitle").textContent =
+      "Record where this member is in the Registrar's IPPMS process. The register itself is kept in IPPMS.";
+
+    const options = Object.entries(IPPMS_STATUS_LABELS)
+      .map(([value, label]) =>
+        `<option value="${value}" ${value === (data.ippmsStatus || "NOT_SUBMITTED") ? "selected" : ""}>${label}</option>`)
+      .join("");
+
+    fields.innerHTML = `
+      <div class="form-group">
+        <label for="ippmsStatus">IPPMS status</label>
+        <select id="ippmsStatus" class="form-control">${options}</select>
+      </div>
+
+      <div class="form-group">
+        <label for="ippmsReference">IPPMS reference (optional)</label>
+        <input type="text" id="ippmsReference" class="form-control" value="${esc(data.ippmsReference || "")}" />
+      </div>
+
+      <div class="form-group form-grid-full">
+        <label style="font-weight: 400; display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" id="cardIssued" ${data.cardIssued ? "checked" : ""} />
+          Membership card issued to the member
+        </label>
+      </div>
+    `;
+  }
+
+  if (isResignation) {
+    document.getElementById("trackingTitle").textContent = "Resignation tracking";
+
+    const noticeDate = data.resignationNoticeDate?.toDate
+      ? data.resignationNoticeDate.toDate()
+      : null;
+
+    let dueText = "";
+
+    if (noticeDate) {
+      const due = new Date(noticeDate);
+      due.setDate(due.getDate() + 7);
+      dueText = `Notice received ${noticeDate.toLocaleDateString("en-GB")}. ` +
+        `The Registrar must be notified by ${due.toLocaleDateString("en-GB")}.`;
+    }
+
+    document.getElementById("trackingSubtitle").textContent = dueText;
+
+    fields.innerHTML = `
+      <div class="form-group form-grid-full">
+        <label style="font-weight: 400; display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" id="registrarNotified" ${data.registrarNotified ? "checked" : ""} />
+          The Registrar has been notified of this resignation
+        </label>
+      </div>
+    `;
+  }
+
+  document
+    .getElementById("saveTrackingBtn")
+    .addEventListener("click", () => saveTracking(caseId, data, currentUser));
+}
+
+async function saveTracking(caseId, data, currentUser) {
+  const saveBtn = document.getElementById("saveTrackingBtn");
+  const savedMessage = document.getElementById("trackingSavedMessage");
+
+  const updates = { updatedAt: serverTimestamp() };
+  let details = "";
+
+  if (data.service === "MEMBERSHIP_REGISTRATION") {
+    const ippmsStatus = document.getElementById("ippmsStatus").value;
+    const cardIssued = document.getElementById("cardIssued").checked;
+
+    updates.ippmsStatus = ippmsStatus;
+    updates.ippmsReference = document.getElementById("ippmsReference").value.trim() || null;
+    updates.cardIssued = cardIssued;
+
+    if (cardIssued && !data.cardIssued) {
+      updates.cardIssuedAt = serverTimestamp();
+    }
+
+    details = `IPPMS: ${ippmsStatus}; card issued: ${cardIssued ? "yes" : "no"}`;
+  }
+
+  if (data.service === "RESIGNATION") {
+    const notified = document.getElementById("registrarNotified").checked;
+
+    updates.registrarNotified = notified;
+
+    if (notified && !data.registrarNotified) {
+      updates.registrarNotifiedAt = serverTimestamp();
+    }
+
+    details = `Registrar notified: ${notified ? "yes" : "no"}`;
+  }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Saving...";
+
+  try {
+    await updateDoc(doc(db, "cases", caseId), updates);
+
+    // Keep our local copy current so "newly ticked" checks stay right.
+    if ("cardIssued" in updates) data.cardIssued = updates.cardIssued;
+    if ("registrarNotified" in updates) data.registrarNotified = updates.registrarNotified;
+
+    logAudit(currentUser, "CASE_UPDATED", {
+      targetType: "case",
+      targetId: caseId,
+      targetLabel: data.reference,
+      details
+    });
+
+    savedMessage.classList.remove("hidden");
+    window.setTimeout(() => savedMessage.classList.add("hidden"), 2500);
+
+  } catch (error) {
+    console.error("Failed to save tracking:", error);
+    showPageError("Could not save tracking details. Please try again.");
+
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save Tracking";
+  }
+}
+
 async function init() {
   const { user } = await requireRole(["ADMIN", "SUPERVISOR", "OFFICER"]);
 
@@ -302,6 +461,8 @@ async function init() {
     document.getElementById("caseLoading").classList.add("hidden");
     return;
   }
+
+  renderTracking(caseId, data, user);
 
   loadFollowups(caseId, user, data.reference);
 
