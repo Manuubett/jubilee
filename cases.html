@@ -7,22 +7,20 @@
     content="width=device-width, initial-scale=1.0"
   />
 
-  <title>Cases | Jubilee Embu Membership Service System</title>
+  <title>Cases | Jubilee Embu - Kangaru Membership Service System</title>
 
   <link rel="stylesheet" href="./css/app.css" />
 </head>
 
 <body>
-
+  <!-- Shared application shell -->
   <div id="app-shell"></div>
 
+  <!-- Main application -->
   <main class="app-main">
-
     <!-- Top bar -->
     <header class="topbar">
-
       <div class="topbar-left">
-
         <button
           type="button"
           class="mobile-menu-btn"
@@ -33,20 +31,16 @@
         </button>
 
         <div>
-          <h1 class="page-title">Service Cases</h1>
-
+          <h1 class="page-title">Cases</h1>
           <p class="page-subtitle">
-            Search and manage membership service cases
+            Search and manage service cases for the Embu - Kangaru office
           </p>
         </div>
-
       </div>
 
       <div class="topbar-right">
-
         <div class="topbar-search">
           <span class="search-icon">⌕</span>
-
           <input
             type="search"
             id="globalSearch"
@@ -55,45 +49,24 @@
           />
         </div>
 
-        <div class="user-menu">
-
-          <div
-            class="user-avatar"
-            id="userAvatar"
-          >
-            U
-          </div>
+        <div class="user-menu" id="userMenu">
+          <div class="user-avatar" id="userAvatar">U</div>
 
           <div class="user-info">
-
-            <strong id="topbarUserName">
-              User
-            </strong>
-
-            <span id="topbarUserRole">
-              Officer
-            </span>
-
+            <strong id="topbarUserName">User</strong>
+            <span id="topbarUserRole">OFFICER</span>
           </div>
-
         </div>
-
       </div>
-
     </header>
 
-    <!-- Content -->
+    <!-- Page content -->
     <section class="page-content">
 
-      <!-- Header -->
       <div class="page-heading-row">
-
         <div>
           <h2>Service Cases</h2>
-
-          <p>
-            View, search and manage office service requests.
-          </p>
+          <p>All cases recorded by the Kangaru office</p>
         </div>
 
         <a
@@ -103,294 +76,141 @@
           <span>＋</span>
           New Service Case
         </a>
-
       </div>
-
-      <!-- Error -->
-      <div
-        id="casesError"
-        class="alert alert-danger hidden"
-        role="alert"
-      ></div>
 
       <!-- Filters -->
       <section class="filter-panel">
 
         <div class="filter-panel-header">
-
           <div>
-            <h3>Search & Filters</h3>
-
-            <p>
-              Narrow down the service cases displayed below.
-            </p>
+            <h3>Filter Cases</h3>
+            <p>Narrow down by reference, status, priority or service</p>
           </div>
-
-          <button
-            type="button"
-            class="btn btn-secondary"
-            id="clearFiltersBtn"
-          >
-            Clear Filters
-          </button>
-
         </div>
 
         <div class="filter-grid">
 
-          <!-- Search -->
-          <div class="form-group filter-search">
+          <input
+            type="search"
+            id="filterSearch"
+            class="form-control filter-search"
+            placeholder="Search by reference or applicant name..."
+            autocomplete="off"
+          />
 
-            <label for="caseSearch">
-              Search
-            </label>
+          <select id="filterStatus" class="form-control">
+            <option value="">All Statuses</option>
+            <option value="NEW">New</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="WAITING">Waiting</option>
+            <option value="RESOLVED">Resolved</option>
+            <option value="CLOSED">Closed</option>
+          </select>
 
-            <input
-              type="search"
-              id="caseSearch"
-              class="form-control"
-              placeholder="Case reference, name or phone..."
-              autocomplete="off"
-            />
+          <select id="filterPriority" class="form-control">
+            <option value="">All Priorities</option>
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="URGENT">Urgent</option>
+          </select>
 
-          </div>
-
-          <!-- Status -->
-          <div class="form-group">
-
-            <label for="statusFilter">
-              Status
-            </label>
-
-            <select
-              id="statusFilter"
-              class="form-control"
-            >
-              <option value="">All statuses</option>
-              <option value="NEW">New</option>
-              <option value="ASSIGNED">Assigned</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="WAITING_FOR_INFORMATION">
-                Waiting for Information
-              </option>
-              <option value="RESOLVED">Resolved</option>
-              <option value="CLOSED">Closed</option>
-            </select>
-
-          </div>
-
-          <!-- Service -->
-          <div class="form-group">
-
-            <label for="serviceFilter">
-              Service Type
-            </label>
-
-            <select
-              id="serviceFilter"
-              class="form-control"
-            >
-              <option value="">All services</option>
-
-              <option value="REGISTRATION_ASSISTANCE">
-                Registration Assistance
-              </option>
-
-              <option value="MEMBERSHIP_STATUS_ASSISTANCE">
-                Membership Status Assistance
-              </option>
-
-              <option value="INFORMATION_UPDATE">
-                Information Update
-              </option>
-
-              <option value="MEMBERSHIP_ENQUIRY">
-                Membership Enquiry
-              </option>
-
-              <option value="REFERRAL">
-                Referral
-              </option>
-
-              <option value="OTHER">
-                Other
-              </option>
-            </select>
-
-          </div>
-
-          <!-- Priority -->
-          <div class="form-group">
-
-            <label for="priorityFilter">
-              Priority
-            </label>
-
-            <select
-              id="priorityFilter"
-              class="form-control"
-            >
-              <option value="">All priorities</option>
-              <option value="LOW">Low</option>
-              <option value="NORMAL">Normal</option>
-              <option value="HIGH">High</option>
-              <option value="URGENT">Urgent</option>
-            </select>
-
-          </div>
+          <select id="filterService" class="form-control">
+            <option value="">All Services</option>
+            <option value="MEMBERSHIP_REGISTRATION">Membership Registration</option>
+            <option value="CARD_REPLACEMENT">Card Replacement</option>
+            <option value="RECORD_UPDATE">Record Update</option>
+            <option value="RESIGNATION">Membership Resignation</option>
+            <option value="COMPLAINT">Complaint</option>
+            <option value="OTHER">Other</option>
+          </select>
 
         </div>
 
       </section>
 
-      <!-- Cases panel -->
+      <!-- Cases table -->
       <section class="dashboard-panel cases-panel">
 
-        <div class="panel-header">
-
-          <div>
-            <h3>
-              Case Register
-            </h3>
-
-            <p id="caseResultSummary">
-              Loading cases...
-            </p>
-          </div>
-
-          <div class="table-actions">
-
-            <button
-              type="button"
-              class="btn btn-secondary"
-              id="refreshCasesBtn"
-            >
-              ↻ Refresh
-            </button>
-
-          </div>
-
-        </div>
-
-        <!-- Loading -->
-        <div
-          id="casesLoading"
-          class="table-loading"
-        >
-          <div class="loading-spinner"></div>
-          <span>Loading service cases...</span>
-        </div>
-
-        <!-- Table -->
-        <div
-          id="casesTableContainer"
-          class="table-wrapper hidden"
-        >
-
+        <div class="table-wrapper">
           <table class="data-table cases-table">
-
             <thead>
-
               <tr>
                 <th>Case Reference</th>
                 <th>Applicant</th>
-                <th>Phone</th>
                 <th>Service</th>
                 <th>Status</th>
                 <th>Priority</th>
                 <th>Created</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
-
             </thead>
 
             <tbody id="casesTableBody">
-              <!-- JS -->
+              <tr>
+                <td colspan="7">
+                  <div class="table-loading">
+                    <div class="loading-spinner"></div>
+                    <span>Loading cases...</span>
+                  </div>
+                </td>
+              </tr>
             </tbody>
-
           </table>
-
         </div>
 
-        <!-- Empty state -->
-        <div
-          id="casesEmpty"
-          class="empty-state hidden"
-        >
-
-          <div class="empty-state-icon">
-            ▣
-          </div>
-
-          <h3>No cases found</h3>
-
+        <!-- Empty state (shown/hidden by cases.js) -->
+        <div id="casesEmptyState" class="empty-state hidden">
+          <div class="empty-state-icon">▣</div>
+          <h3>No cases match your filters</h3>
           <p>
-            There are no service cases matching your current search or filters.
+            Try clearing a filter, or record a new service case
+            for the Kangaru office.
           </p>
-
-          <button
-            type="button"
-            class="btn btn-secondary"
-            id="emptyClearFiltersBtn"
-          >
-            Clear Filters
-          </button>
-
+          <a href="./new-case.html" class="btn btn-primary">
+            <span>＋</span>
+            New Service Case
+          </a>
         </div>
 
         <!-- Pagination -->
-        <div
-          id="casesPagination"
-          class="pagination hidden"
-        >
-
-          <div class="pagination-info">
-            <span id="paginationInfo">
-              Showing 0–0
-            </span>
-          </div>
+        <div class="pagination">
+          <span class="pagination-info" id="paginationInfo">
+            Showing 0 cases
+          </span>
 
           <div class="pagination-buttons">
-
             <button
               type="button"
-              class="btn btn-secondary"
-              id="previousPageBtn"
+              class="btn"
+              id="prevPageBtn"
               disabled
             >
               ← Previous
             </button>
 
-            <span
-              id="pageNumber"
-              class="page-number"
-            >
-              Page 1
-            </span>
+            <span class="page-number" id="pageNumber">Page 1</span>
 
             <button
               type="button"
-              class="btn btn-secondary"
+              class="btn"
               id="nextPageBtn"
               disabled
             >
               Next →
             </button>
-
           </div>
-
         </div>
 
       </section>
 
     </section>
-
   </main>
 
+  <!-- Cases application -->
   <script
     type="module"
-    src="cases.js"
+    src="./js/cases.js"
   ></script>
-
 </body>
 </html>
