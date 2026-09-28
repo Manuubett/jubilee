@@ -17,7 +17,10 @@ const ACTION_LABELS = {
   FOLLOWUP_ADDED: "Follow-up Added",
   FOLLOWUP_COMPLETED: "Follow-up Completed",
   USER_ROLE_CHANGED: "User Role Changed",
-  USER_STATUS_CHANGED: "User Status Changed"
+  USER_STATUS_CHANGED: "User Status Changed",
+  USER_APPROVED: "User Approved",
+  USER_DECLINED: "User Declined",
+  DATA_PURGED: "Test Data Deleted"
 };
 
 // Fetched once, then re-filtered locally as the person types
