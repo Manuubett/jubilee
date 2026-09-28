@@ -25,7 +25,7 @@ const BATCH_SIZE = 400;
 // dateField is the timestamp field used for the optional cutoff.
 const TARGETS = [
   { key: "cases",        label: "Service cases",       dateField: "createdAt" },
-  { key: "followups",    label: "Follow-ups",          dateField: "createdAt" },
+  { key: "followUps",    label: "Follow-ups",          dateField: "createdAt" },
   { key: "auditLogs",    label: "Audit log entries",   dateField: "timestamp" },
   { key: "invitedUsers", label: "Pending user invites", dateField: "invitedAt" }
 ];
