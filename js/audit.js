@@ -10,6 +10,7 @@ import {
 
 import { db } from "./firebase.js";
 import { requireRole } from "./layout.js";
+import { esc } from "./utils.js";
 
 const ACTION_LABELS = {
   CASE_CREATED: "Case Created",
@@ -20,7 +21,8 @@ const ACTION_LABELS = {
   USER_STATUS_CHANGED: "User Status Changed",
   USER_APPROVED: "User Approved",
   USER_DECLINED: "User Declined",
-  DATA_PURGED: "Test Data Deleted"
+  DATA_PURGED: "Test Data Deleted",
+  REPORT_EXPORTED: "Report Exported"
 };
 
 // Fetched once, then re-filtered locally as the person types
@@ -51,10 +53,10 @@ function renderRow(docSnap) {
   return `
     <tr>
       <td>${formatTimestamp(data.timestamp)}</td>
-      <td>${actor}</td>
-      <td>${actionLabel}</td>
-      <td>${data.targetLabel || data.targetId || "—"}</td>
-      <td>${data.details || "—"}</td>
+      <td>${esc(actor)}</td>
+      <td>${esc(actionLabel)}</td>
+      <td>${esc(data.targetLabel || data.targetId || "—")}</td>
+      <td>${esc(data.details || "—")}</td>
     </tr>
   `;
 }
