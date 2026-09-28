@@ -85,7 +85,7 @@
               </div>
 
               <div class="form-group">
-                <label for="applicantIdNumber">National ID / Membership No.</label>
+                <label for="applicantIdNumber">National ID / Passport No. <span id="idRequiredMark"></span></label>
                 <input
                   type="text"
                   id="applicantIdNumber"
@@ -116,6 +116,7 @@
                   <option value="MEMBERSHIP_REGISTRATION">Membership Registration</option>
                   <option value="CARD_REPLACEMENT">Card Replacement</option>
                   <option value="RECORD_UPDATE">Record Update</option>
+                  <option value="RESIGNATION">Membership Resignation</option>
                   <option value="COMPLAINT">Complaint</option>
                   <option value="OTHER">Other</option>
                 </select>
@@ -141,6 +142,93 @@
                 ></textarea>
               </div>
             </div>
+          </div>
+
+
+          <!-- Only for Membership Registration -->
+          <div class="form-section hidden" id="eligibilitySection">
+            <h3>Eligibility check</h3>
+            <p>
+              Under the Political Parties Act, a member must be a Kenyan
+              citizen and a registered voter, and cannot belong to another
+              party at the same time. Confirm each with the applicant.
+            </p>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="eligCitizen">Kenyan citizen? *</label>
+                <select id="eligCitizen" class="form-control">
+                  <option value="">Select...</option>
+                  <option value="YES">Yes</option>
+                  <option value="NO">No</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="eligVoter">Registered voter? *</label>
+                <select id="eligVoter" class="form-control">
+                  <option value="">Select...</option>
+                  <option value="YES">Yes</option>
+                  <option value="NO">No</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="eligOtherParty">Member of another party? *</label>
+                <select id="eligOtherParty" class="form-control">
+                  <option value="">Select...</option>
+                  <option value="NO">No</option>
+                  <option value="YES">Yes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Only for Membership Resignation -->
+          <div class="form-section hidden" id="resignationSection">
+            <h3>Resignation notice</h3>
+            <p>
+              A resignation must be given in writing. The party must notify
+              the Registrar within seven days, so a follow-up is created
+              automatically for you.
+            </p>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="noticeDate">Date written notice received *</label>
+                <input type="date" id="noticeDate" class="form-control" />
+              </div>
+
+              <div class="form-group">
+                <label for="noticeStamped">Written letter *</label>
+                <label style="font-weight: 400; display: flex; gap: 8px; align-items: center; margin-top: 10px;">
+                  <input type="checkbox" id="noticeStamped" />
+                  Letter received and stamped by the office
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consent and privacy -->
+          <div class="form-section">
+            <h3>Consent &amp; privacy</h3>
+
+            <!-- DRAFT wording: have the party's legal officer confirm it. -->
+            <p style="background: var(--background); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; line-height: 1.5;">
+              The applicant's details are collected only to handle this service
+              request and, for membership registration, to submit their record
+              to the Registrar of Political Parties. They are kept confidential,
+              used for no other purpose, and can be seen only by authorised office
+              staff. The applicant may ask to see or correct their details.
+            </p>
+
+            <label style="font-weight: 400; display: flex; gap: 8px; align-items: flex-start;">
+              <input type="checkbox" id="consentGiven" style="margin-top: 3px;" />
+              <span>
+                I have explained the above to the applicant and they agree to
+                their details being recorded. *
+              </span>
+            </label>
           </div>
 
           <div class="form-actions">
