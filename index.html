@@ -11,12 +11,83 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <title>Jubilee Embu — Membership Service</title>
+  <title>Jubilee Embu - Kangaru — Membership Service</title>
 
   <link
     rel="stylesheet"
     href="css/app.css"
   >
+
+  <style>
+    /* Let this page scroll on small screens (app.css locks the
+       dashboard layout to the viewport height). */
+    html:has(body.login-page),
+    body.login-page {
+      height: auto;
+      overflow-y: auto;
+    }
+
+    .login-logo {
+      display: block;
+
+      width: auto;
+      max-width: 220px;
+      height: 96px;
+
+      margin: 0 auto 16px;
+
+      object-fit: contain;
+    }
+
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      margin: 24px 0 18px;
+
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .login-divider::before,
+    .login-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .signup-box {
+      text-align: center;
+
+      padding: 16px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: #fafafa;
+
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .signup-box a {
+      display: inline-block;
+
+      margin-top: 8px;
+
+      color: var(--jubilee-red);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .signup-box a:hover {
+      text-decoration: underline;
+    }
+  </style>
 
 </head>
 
@@ -26,16 +97,19 @@
 
     <div class="login-brand">
 
-      <div class="jubilee-mark">
-        J
-      </div>
+      <img
+        class="login-logo"
+        src="assets/jubilee-logo.png"
+        alt="Jubilee Party logo"
+        onerror="this.style.display='none'"
+      >
 
       <h1>
         Membership Service
       </h1>
 
       <p>
-        Embu Office
+        Embu - Kangaru Office
       </p>
 
     </div>
@@ -91,6 +165,20 @@
       ></div>
 
     </form>
+
+
+    <!-- New staff without an account -->
+    <div class="login-divider">
+      New here?
+    </div>
+
+    <div class="signup-box">
+      Don't have an account yet?
+      <br>
+      <a href="request-access.html">
+        Request access →
+      </a>
+    </div>
 
   </div>
 
