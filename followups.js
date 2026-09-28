@@ -115,7 +115,7 @@ function applyFilter() {
 
 async function markDone(followupId) {
   try {
-    await updateDoc(doc(db, "followups", followupId), {
+    await updateDoc(doc(db, "followUps", followupId), {
       status: "DONE",
       completedAt: serverTimestamp()
     });
@@ -126,7 +126,7 @@ async function markDone(followupId) {
 
 async function loadFollowups() {
   const followupsQuery = query(
-    collection(db, "followups"),
+    collection(db, "followUps"),
     orderBy("dueDate", "asc"),
     limit(100)
   );
