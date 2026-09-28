@@ -44,32 +44,67 @@ function roleOptionsHtml(selectedRole) {
     .join("");
 }
 
+// User-supplied text (name, note...) is rendered with innerHTML, and
+// people can now register themselves, so always escape it.
+function esc(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 function renderRow(docSnap) {
   const data = docSnap.data();
   const uid = docSnap.id;
 
-  const isActive = data.active !== false;
+  const isPending = data.role === "PENDING";
+  const isDeclined = data.role === "DECLINED";
+  const needsDecision = isPending || isDeclined;
 
-  return `
-    <tr>
-      <td>${data.displayName || data.name || "—"}</td>
-      <td>${data.email || "—"}</td>
-      <td>
-        <select class="form-control" data-role-select="${uid}" style="min-height: 36px; padding: 6px 10px;">
-          ${roleOptionsHtml(data.role || "OFFICER")}
-        </select>
-      </td>
-      <td>
-        <span class="badge ${isActive ? "badge-resolved" : "badge-neutral"}">
-          ${isActive ? "Active" : "Deactivated"}
-        </span>
-      </td>
-      <td class="table-actions">
+  const isActive = data.active !== false && !needsDecision;
+
+  // Never default an unapproved person to a powerful role.
+  const selectedRole = needsDecision ? "OFFICER" : (data.role || "OFFICER");
+
+  let badge = `<span class="badge ${isActive ? "badge-resolved" : "badge-neutral"}">${isActive ? "Active" : "Deactivated"}</span>`;
+
+  if (isPending) {
+    badge = `<span class="badge badge-warning">Pending approval</span>`;
+  } else if (isDeclined) {
+    badge = `<span class="badge badge-danger">Declined</span>`;
+  }
+
+  const requestDetails = needsDecision
+    ? `<div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+         ${esc(data.phone || "")}${data.requestNote ? " · " + esc(data.requestNote) : ""}
+       </div>`
+    : "";
+
+  const actions = needsDecision
+    ? `
+        <a href="#" class="table-action-link" data-approve="${uid}">Approve</a>
+        ${isPending ? `<a href="#" class="table-action-link" data-decline="${uid}">Decline</a>` : ""}
+      `
+    : `
         <a href="#" class="table-action-link" data-save-role="${uid}">Save Role</a>
         <a href="#" class="table-action-link" data-toggle-active="${uid}" data-active="${isActive}">
           ${isActive ? "Deactivate" : "Activate"}
         </a>
+      `;
+
+  return `
+    <tr>
+      <td>${esc(data.displayName || data.name || "—")}</td>
+      <td>${esc(data.email || "—")}${requestDetails}</td>
+      <td>
+        <select class="form-control" data-role-select="${uid}" style="min-height: 36px; padding: 6px 10px;">
+          ${roleOptionsHtml(selectedRole)}
+        </select>
       </td>
+      <td>${badge}</td>
+      <td class="table-actions">${actions}</td>
     </tr>
   `;
 }
@@ -85,7 +120,13 @@ async function loadUsers(currentUser) {
       return;
     }
 
-    tbody.innerHTML = snapshot.docs.map(renderRow).join("");
+    // People waiting for a decision go to the top.
+    const sorted = [...snapshot.docs].sort((a, b) => {
+      const rank = (d) => (d.data().role === "PENDING" ? 0 : 1);
+      return rank(a) - rank(b);
+    });
+
+    tbody.innerHTML = sorted.map(renderRow).join("");
     bindRowEvents(currentUser);
 
   } catch (error) {
@@ -95,6 +136,70 @@ async function loadUsers(currentUser) {
 }
 
 function bindRowEvents(currentUser) {
+  document.querySelectorAll("[data-approve]").forEach(link => {
+    link.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      const uid = event.target.dataset.approve;
+      const select = document.querySelector(`[data-role-select="${uid}"]`);
+      const targetLabel = event.target.closest("tr")?.children[0]?.textContent?.trim();
+
+      try {
+        await updateDoc(doc(db, "users", uid), {
+          role: select.value,
+          active: true,
+          approvedBy: currentUser?.uid || null,
+          approvedAt: serverTimestamp()
+        });
+
+        logAudit(currentUser, "USER_APPROVED", {
+          targetType: "user",
+          targetId: uid,
+          targetLabel,
+          details: `approved as ${select.value}`
+        });
+
+        showSuccess(`${targetLabel} approved as ${ROLE_LABELS[select.value]}.`);
+        loadUsers(currentUser);
+      } catch (error) {
+        console.error("Failed to approve user:", error);
+        showError("Could not approve that user. Only an Admin can approve requests.");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-decline]").forEach(link => {
+    link.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      const uid = event.target.dataset.decline;
+      const targetLabel = event.target.closest("tr")?.children[0]?.textContent?.trim();
+
+      if (!window.confirm(`Decline the access request from ${targetLabel}?`)) {
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "users", uid), {
+          role: "DECLINED",
+          active: false
+        });
+
+        logAudit(currentUser, "USER_DECLINED", {
+          targetType: "user",
+          targetId: uid,
+          targetLabel
+        });
+
+        showSuccess("Request declined.");
+        loadUsers(currentUser);
+      } catch (error) {
+        console.error("Failed to decline user:", error);
+        showError("Could not decline that request. Only an Admin can do this.");
+      }
+    });
+  });
+
   document.querySelectorAll("[data-save-role]").forEach(link => {
     link.addEventListener("click", async (event) => {
       event.preventDefault();
