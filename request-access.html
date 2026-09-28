@@ -6,31 +6,262 @@
 
   <title>Request Access | Jubilee Embu - Kangaru Membership Service System</title>
 
-  <link rel="stylesheet" href="./css/app.css" />
+  <style>
+    :root {
+      --jubilee-red: #c8102e;
+      --jubilee-red-dark: #a50d25;
+      --white: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --success: #15803d;
+      --danger: #b91c1c;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      color: var(--text);
+
+      /* Same red gradient as the sign-in page */
+      background: linear-gradient(135deg, #a50d25 0%, #c8102e 50%, #e21b36 100%);
+      background-attachment: fixed;
+
+      /* The form is tall, so this page must be allowed to scroll */
+      overflow-y: auto;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--white);
+      border-radius: 16px;
+      padding: 38px 36px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.22);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 14px;
+      border-radius: 14px;
+      background: var(--white);
+      border: 1px solid #f3d5da;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: var(--jubilee-red);
+      font-size: 30px;
+      font-weight: 900;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      font-weight: 800;
+      color: #111;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .brand .badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #fff1f3;
+      color: var(--jubilee-red);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .intro {
+      margin: 0 0 22px;
+      padding: 12px 14px;
+      background: #f9fafb;
+      border: 1px solid #eef0f2;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .form-control {
+      width: 100%;
+      min-height: 44px;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--jubilee-red);
+      box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+    }
+
+    .hint {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 13px 18px;
+      border: none;
+      border-radius: 8px;
+      background: var(--jubilee-red);
+      color: var(--white);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn:hover { background: var(--jubilee-red-dark); }
+
+    .btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      margin-bottom: 18px;
+      padding: 13px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .alert-danger {
+      background: #fef2f2;
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+      background: #ecfdf3;
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+    }
+
+    .hidden { display: none !important; }
+
+    .link {
+      color: var(--jubilee-red);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .link:hover { text-decoration: underline; }
+
+    .footer-text {
+      margin: 20px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .page { padding: 12px; align-items: flex-start; }
+      .card { padding: 28px 20px; border-radius: 14px; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+    }
+  </style>
 </head>
 
-<body class="login-page">
+<body>
 
-  <div class="login-card">
+  <div class="page">
+  <div class="card">
 
-    <div class="login-brand">
-      <div class="jubilee-mark">
-        <img src="./assets/jubilee-logo.png" alt="Jubilee Party logo" />
+    <div class="brand">
+      <div class="logo">
+        <img
+          src="./assets/jubilee-logo.png"
+          alt="Jubilee Party logo"
+          onerror="this.replaceWith(document.createTextNode('J'))"
+        />
       </div>
 
       <h1>Request Access</h1>
-      <p>Embu - Kangaru Office</p>
+      <p>Jubilee Embu - Kangaru Office</p>
+      <span class="badge">Staff access</span>
     </div>
 
     <div id="successBox" class="alert alert-success hidden" role="status">
       <strong>Request sent.</strong> An administrator will review it. You
       will be able to sign in once you are approved.
       <div style="margin-top: 12px;">
-        <a href="./index.html" class="table-link">← Back to sign in</a>
+        <a href="./index.html" class="link">← Back to sign in</a>
       </div>
     </div>
 
     <form id="requestForm">
+
+      <p class="intro">
+        Fill in your details below. An administrator will review your
+        request and assign your access level. You can sign in once you
+        are approved.
+      </p>
 
       <div id="formError" class="alert alert-danger hidden" role="alert"></div>
 
@@ -39,14 +270,16 @@
         <input type="text" id="fullName" class="form-control" required autocomplete="name" />
       </div>
 
-      <div class="form-group">
-        <label for="phone">Phone Number</label>
-        <input type="tel" id="phone" class="form-control" placeholder="07XX XXX XXX" required autocomplete="tel" />
-      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" class="form-control" placeholder="07XX XXX XXX" required autocomplete="tel" />
+        </div>
 
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" class="form-control" required autocomplete="email" />
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" required autocomplete="email" />
+        </div>
       </div>
 
       <div class="form-group">
@@ -60,27 +293,31 @@
         />
       </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" class="form-control" minlength="8" required autocomplete="new-password" />
-      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" minlength="8" required autocomplete="new-password" />
+        </div>
 
-      <div class="form-group">
-        <label for="confirmPassword">Confirm Password</label>
-        <input type="password" id="confirmPassword" class="form-control" minlength="8" required autocomplete="new-password" />
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" class="form-control" minlength="8" required autocomplete="new-password" />
+        </div>
       </div>
+      <p class="hint" style="margin: -6px 0 18px;">At least 8 characters.</p>
 
-      <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+      <button type="submit" class="btn" id="submitBtn">
         Send Request
       </button>
 
-      <p style="text-align: center; margin: 18px 0 0; font-size: 14px; color: var(--muted);">
+      <p class="footer-text">
         Already approved?
-        <a href="./index.html" class="table-link">Sign in</a>
+        <a href="./index.html" class="link">Sign in</a>
       </p>
 
     </form>
 
+  </div>
   </div>
 
   <script type="module" src="./js/request-access.js"></script>
