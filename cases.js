@@ -4,1213 +4,346 @@ import {
   collection,
   query,
   where,
-  getDocs,
-  limit
+  orderBy,
+  limit,
+  startAfter,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-import {
-  db
-} from "./firebase.js";
+import { db } from "./firebase.js";
+import { requireRole } from "./layout.js";
+import { esc } from "./utils.js";
 
-import {
-  initLayout
-} from "./layout.js";
-
-/* -------------------------------------------------------
-   CONSTANTS
-------------------------------------------------------- */
+// This system serves a single branch office. Every case is
+// tagged with this office id so cases from other branches
+// (once the party rolls this out elsewhere) never show up
+// here.
+const OFFICE_ID = "EMBU_KANGARU";
 
 const PAGE_SIZE = 10;
 
-/*
- * Maximum number of records loaded into the browser
- * for this V1 case register.
- *
- * This prevents accidentally downloading the entire
- * collection.
- */
-const WORKING_SET_SIZE = 100;
-
-const SERVICE_LABELS = {
-  REGISTRATION_ASSISTANCE:
-    "Registration Assistance",
-
-  MEMBERSHIP_STATUS_ASSISTANCE:
-    "Membership Status Assistance",
-
-  INFORMATION_UPDATE:
-    "Information Update",
-
-  MEMBERSHIP_ENQUIRY:
-    "Membership Enquiry",
-
-  REFERRAL:
-    "Referral",
-
-  OTHER:
-    "Other"
+const STATUS_LABELS = {
+  NEW: "New",
+  IN_PROGRESS: "In Progress",
+  WAITING: "Waiting",
+  RESOLVED: "Resolved",
+  CLOSED: "Closed"
 };
 
-const STATUS_LABELS = {
-  NEW:
-    "New",
-
-  ASSIGNED:
-    "Assigned",
-
-  IN_PROGRESS:
-    "In Progress",
-
-  WAITING_FOR_INFORMATION:
-    "Waiting for Information",
-
-  RESOLVED:
-    "Resolved",
-
-  CLOSED:
-    "Closed"
+const STATUS_BADGE_CLASSES = {
+  NEW: "badge-new",
+  IN_PROGRESS: "badge-progress",
+  WAITING: "badge-waiting",
+  RESOLVED: "badge-resolved",
+  CLOSED: "badge-closed"
 };
 
 const PRIORITY_LABELS = {
-  LOW:
-    "Low",
-
-  NORMAL:
-    "Normal",
-
-  HIGH:
-    "High",
-
-  URGENT:
-    "Urgent"
+  LOW: "Low",
+  MEDIUM: "Medium",
+  HIGH: "High",
+  URGENT: "Urgent"
 };
 
-/* -------------------------------------------------------
-   STATE
-------------------------------------------------------- */
-
-const state = {
-  allCases: [],
-  filteredCases: [],
-  currentPage: 1,
-  pageSize: PAGE_SIZE,
-  loading: false
+const PRIORITY_BADGE_CLASSES = {
+  LOW: "badge-neutral",
+  MEDIUM: "badge-info",
+  HIGH: "badge-warning",
+  URGENT: "badge-danger"
 };
 
-/* -------------------------------------------------------
-   DOM
-------------------------------------------------------- */
+const SERVICE_LABELS = {
+  MEMBERSHIP_REGISTRATION: "Membership Registration",
+  CARD_REPLACEMENT: "Card Replacement",
+  RECORD_UPDATE: "Record Update",
+  RESIGNATION: "Membership Resignation",
+  COMPLAINT: "Complaint",
+  OTHER: "Other"
+};
 
-function el(id) {
-  return document.getElementById(id);
+// Cursor stack: cursorHistory[i] is the last doc of page i.
+// Going to page N+1 uses cursorHistory[N-1] as startAfter.
+let cursorHistory = [];
+let currentPageIndex = 0;
+let currentPageDocs = [];
+
+let debounceTimer = null;
+
+function els() {
+  return {
+    tbody: document.getElementById("casesTableBody"),
+    emptyState: document.getElementById("casesEmptyState"),
+    paginationInfo: document.getElementById("paginationInfo"),
+    pageNumber: document.getElementById("pageNumber"),
+    prevBtn: document.getElementById("prevPageBtn"),
+    nextBtn: document.getElementById("nextPageBtn"),
+    filterSearch: document.getElementById("filterSearch"),
+    filterStatus: document.getElementById("filterStatus"),
+    filterPriority: document.getElementById("filterPriority"),
+    filterService: document.getElementById("filterService")
+  };
 }
 
-/* -------------------------------------------------------
-   FORMATTING
-------------------------------------------------------- */
+function currentFilters() {
+  const { filterStatus, filterPriority, filterService } = els();
 
-function formatService(value) {
-  if (!value) {
-    return "—";
+  return {
+    status: filterStatus.value || null,
+    priority: filterPriority.value || null,
+    service: filterService.value || null
+  };
+}
+
+function currentSearchTerm() {
+  const { filterSearch } = els();
+  return (filterSearch.value || "").trim().toLowerCase();
+}
+
+/**
+ * Build the Firestore query for the requested page.
+ *
+ * Status/priority/service are applied server-side. Free-text
+ * search on reference/applicant name is applied client-side
+ * after fetching, since Firestore has no native substring
+ * search -- see filterFetchedDocs().
+ */
+function buildQuery(afterDoc) {
+  const casesRef = collection(db, "cases");
+
+  const constraints = [
+    where("office", "==", OFFICE_ID)
+  ];
+
+  const filters = currentFilters();
+
+  if (filters.status) {
+    constraints.push(where("status", "==", filters.status));
   }
 
-  return (
-    SERVICE_LABELS[value] ||
-    value
-      .replaceAll("_", " ")
-      .toLowerCase()
-      .replace(/\b\w/g, char =>
-        char.toUpperCase()
-      )
-  );
-}
-
-function formatStatus(value) {
-  return (
-    STATUS_LABELS[value] ||
-    value ||
-    "Unknown"
-  );
-}
-
-function formatPriority(value) {
-  return (
-    PRIORITY_LABELS[value] ||
-    value ||
-    "Normal"
-  );
-}
-
-function getStatusClass(status) {
-  switch (status) {
-
-    case "NEW":
-      return "badge badge-info";
-
-    case "ASSIGNED":
-      return "badge badge-neutral";
-
-    case "IN_PROGRESS":
-      return "badge badge-warning";
-
-    case "WAITING_FOR_INFORMATION":
-      return "badge badge-warning";
-
-    case "RESOLVED":
-      return "badge badge-success";
-
-    case "CLOSED":
-      return "badge badge-neutral";
-
-    default:
-      return "badge badge-neutral";
-  }
-}
-
-function getPriorityClass(priority) {
-  switch (priority) {
-
-    case "URGENT":
-      return "badge badge-danger";
-
-    case "HIGH":
-      return "badge badge-warning";
-
-    case "NORMAL":
-      return "badge badge-neutral";
-
-    case "LOW":
-      return "badge badge-info";
-
-    default:
-      return "badge badge-neutral";
-  }
-}
-
-function toDate(value) {
-  if (!value) {
-    return null;
+  if (filters.priority) {
+    constraints.push(where("priority", "==", filters.priority));
   }
 
-  if (
-    typeof value.toDate === "function"
-  ) {
-    return value.toDate();
+  if (filters.service) {
+    constraints.push(where("service", "==", filters.service));
   }
 
-  if (value instanceof Date) {
-    return value;
+  constraints.push(orderBy("createdAt", "desc"));
+
+  // Fetch a bit more than one page when a free-text search is
+  // active, since some fetched rows may get filtered out
+  // client-side and we still want a full page where possible.
+  const searchActive = currentSearchTerm().length > 0;
+  const fetchLimit = searchActive ? PAGE_SIZE * 3 : PAGE_SIZE;
+
+  constraints.push(limit(fetchLimit));
+
+  if (afterDoc) {
+    constraints.push(startAfter(afterDoc));
   }
 
-  const date =
-    new Date(value);
-
-  return Number.isNaN(
-    date.getTime()
-  )
-    ? null
-    : date;
+  return query(casesRef, ...constraints);
 }
 
-function formatDate(value) {
-  const date =
-    toDate(value);
+function filterFetchedDocs(docs) {
+  const term = currentSearchTerm();
 
-  if (!date) {
-    return "—";
+  if (!term) {
+    return docs;
   }
 
-  return new Intl.DateTimeFormat(
-    "en-KE",
-    {
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
-    }
-  ).format(date);
-}
+  return docs.filter(docSnap => {
+    const data = docSnap.data();
 
-/* -------------------------------------------------------
-   TEXT NORMALISATION
-------------------------------------------------------- */
+    const reference = (data.reference || "").toLowerCase();
+    const applicant = (data.applicantName || "").toLowerCase();
 
-function normalise(value) {
-  return String(
-    value || ""
-  )
-    .trim()
-    .toLowerCase();
-}
-
-/* -------------------------------------------------------
-   LOAD CASES
-------------------------------------------------------- */
-
-async function loadCases() {
-
-  state.loading = true;
-
-  showLoading();
-  hideError();
-
-  try {
-
-    const casesRef =
-      collection(db, "cases");
-
-    /*
-     * We apply no search filter here because Firestore
-     * does not provide ordinary "contains" text search
-     * through where().
-     *
-     * We do apply one server-side filter when possible,
-     * then perform the combined search/filtering locally.
-     */
-    const status =
-      el("statusFilter")?.value || "";
-
-    let casesQuery;
-
-    if (status) {
-
-      casesQuery = query(
-        casesRef,
-        where(
-          "status",
-          "==",
-          status
-        ),
-        limit(WORKING_SET_SIZE)
-      );
-
-    } else {
-
-      casesQuery = query(
-        casesRef,
-        limit(WORKING_SET_SIZE)
-      );
-    }
-
-    const snapshot =
-      await getDocs(
-        casesQuery
-      );
-
-    state.allCases =
-      snapshot.docs.map(
-        document => ({
-          id: document.id,
-          ...document.data()
-        })
-      );
-
-    /*
-     * Always sort the loaded working set by createdAt.
-     */
-    state.allCases.sort(
-      (a, b) => {
-
-        const dateA =
-          toDate(a.createdAt)?.getTime() ||
-          0;
-
-        const dateB =
-          toDate(b.createdAt)?.getTime() ||
-          0;
-
-        return dateB - dateA;
-      }
+    return (
+      reference.includes(term) ||
+      applicant.includes(term)
     );
-
-    state.currentPage = 1;
-
-    applyFilters();
-
-  } catch (error) {
-
-    console.error(
-      "Unable to load cases:",
-      error
-    );
-
-    showError(
-      error
-    );
-
-  } finally {
-
-    state.loading = false;
-
-    hideLoading();
-  }
-}
-
-/* -------------------------------------------------------
-   FILTERING
-------------------------------------------------------- */
-
-function applyFilters() {
-
-  const search =
-    normalise(
-      el("caseSearch")?.value
-    );
-
-  const status =
-    el("statusFilter")?.value || "";
-
-  const service =
-    el("serviceFilter")?.value || "";
-
-  const priority =
-    el("priorityFilter")?.value || "";
-
-  state.filteredCases =
-    state.allCases.filter(
-      caseItem => {
-
-        /*
-         * Status
-         */
-        if (
-          status &&
-          caseItem.status !== status
-        ) {
-          return false;
-        }
-
-        /*
-         * Service
-         */
-        if (
-          service &&
-          caseItem.serviceType !== service
-        ) {
-          return false;
-        }
-
-        /*
-         * Priority
-         */
-        if (
-          priority &&
-          caseItem.priority !== priority
-        ) {
-          return false;
-        }
-
-        /*
-         * Search across useful fields.
-         */
-        if (search) {
-
-          const searchableText = [
-            caseItem.caseReference,
-
-            caseItem.applicant?.fullName,
-
-            caseItem.applicant?.phone,
-
-            caseItem.applicant?.identifierReference,
-
-            caseItem.serviceType,
-
-            formatService(
-              caseItem.serviceType
-            ),
-
-            caseItem.status,
-
-            formatStatus(
-              caseItem.status
-            )
-          ]
-            .map(normalise)
-            .join(" ");
-
-          if (
-            !searchableText.includes(
-              search
-            )
-          ) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-    );
-
-  state.currentPage = 1;
-
-  renderCases();
-}
-
-/* -------------------------------------------------------
-   RENDER
-------------------------------------------------------- */
-
-function renderCases() {
-
-  const tableContainer =
-    el("casesTableContainer");
-
-  const empty =
-    el("casesEmpty");
-
-  const pagination =
-    el("casesPagination");
-
-  const tbody =
-    el("casesTableBody");
-
-  const results =
-    state.filteredCases;
-
-  /*
-   * No records.
-   */
-  if (!results.length) {
-
-    tableContainer?.classList.add(
-      "hidden"
-    );
-
-    pagination?.classList.add(
-      "hidden"
-    );
-
-    empty?.classList.remove(
-      "hidden"
-    );
-
-    updateSummary(0);
-
-    return;
-  }
-
-  /*
-   * Records exist.
-   */
-  empty?.classList.add(
-    "hidden"
-  );
-
-  tableContainer?.classList.remove(
-    "hidden"
-  );
-
-  /*
-   * Pagination.
-   */
-  const total =
-    results.length;
-
-  const totalPages =
-    Math.ceil(
-      total / state.pageSize
-    );
-
-  if (
-    state.currentPage >
-    totalPages
-  ) {
-    state.currentPage =
-      totalPages;
-  }
-
-  const startIndex =
-    (
-      state.currentPage - 1
-    ) *
-    state.pageSize;
-
-  const endIndex =
-    Math.min(
-      startIndex +
-        state.pageSize,
-      total
-    );
-
-  const visibleCases =
-    results.slice(
-      startIndex,
-      endIndex
-    );
-
-  renderTable(
-    visibleCases
-  );
-
-  renderPagination(
-    startIndex,
-    endIndex,
-    total,
-    totalPages
-  );
-
-  updateSummary(
-    total
-  );
-}
-
-/* -------------------------------------------------------
-   TABLE
-------------------------------------------------------- */
-
-function renderTable(cases) {
-
-  const tbody =
-    el("casesTableBody");
-
-  if (!tbody) {
-    return;
-  }
-
-  tbody.innerHTML = "";
-
-  cases.forEach(
-    caseItem => {
-
-      const row =
-        document.createElement("tr");
-
-      /*
-       * Case reference
-       */
-      const referenceCell =
-        document.createElement("td");
-
-      const referenceLink =
-        document.createElement("a");
-
-      referenceLink.href =
-        `./case-details.html?id=${encodeURIComponent(caseItem.id)}`;
-
-      referenceLink.className =
-        "table-link";
-
-      referenceLink.textContent =
-        caseItem.caseReference ||
-        caseItem.id;
-
-      referenceCell.appendChild(
-        referenceLink
-      );
-
-      /*
-       * Applicant
-       */
-      const applicantCell =
-        document.createElement("td");
-
-      applicantCell.textContent =
-        caseItem.applicant?.fullName ||
-        "—";
-
-      /*
-       * Phone
-       */
-      const phoneCell =
-        document.createElement("td");
-
-      phoneCell.textContent =
-        caseItem.applicant?.phone ||
-        "—";
-
-      /*
-       * Service
-       */
-      const serviceCell =
-        document.createElement("td");
-
-      serviceCell.textContent =
-        formatService(
-          caseItem.serviceType
-        );
-
-      /*
-       * Status
-       */
-      const statusCell =
-        document.createElement("td");
-
-      const statusBadge =
-        document.createElement("span");
-
-      statusBadge.className =
-        getStatusClass(
-          caseItem.status
-        );
-
-      statusBadge.textContent =
-        formatStatus(
-          caseItem.status
-        );
-
-      statusCell.appendChild(
-        statusBadge
-      );
-
-      /*
-       * Priority
-       */
-      const priorityCell =
-        document.createElement("td");
-
-      const priorityBadge =
-        document.createElement("span");
-
-      priorityBadge.className =
-        getPriorityClass(
-          caseItem.priority
-        );
-
-      priorityBadge.textContent =
-        formatPriority(
-          caseItem.priority
-        );
-
-      priorityCell.appendChild(
-        priorityBadge
-      );
-
-      /*
-       * Created
-       */
-      const createdCell =
-        document.createElement("td");
-
-      createdCell.textContent =
-        formatDate(
-          caseItem.createdAt
-        );
-
-      /*
-       * Action
-       */
-      const actionCell =
-        document.createElement("td");
-
-      const viewLink =
-        document.createElement("a");
-
-      viewLink.href =
-        `./case-details.html?id=${encodeURIComponent(caseItem.id)}`;
-
-      viewLink.className =
-        "table-action-link";
-
-      viewLink.textContent =
-        "View";
-
-      actionCell.appendChild(
-        viewLink
-      );
-
-      row.appendChild(
-        referenceCell
-      );
-
-      row.appendChild(
-        applicantCell
-      );
-
-      row.appendChild(
-        phoneCell
-      );
-
-      row.appendChild(
-        serviceCell
-      );
-
-      row.appendChild(
-        statusCell
-      );
-
-      row.appendChild(
-        priorityCell
-      );
-
-      row.appendChild(
-        createdCell
-      );
-
-      row.appendChild(
-        actionCell
-      );
-
-      tbody.appendChild(
-        row
-      );
-    }
-  );
-}
-
-/* -------------------------------------------------------
-   PAGINATION
-------------------------------------------------------- */
-
-function renderPagination(
-  startIndex,
-  endIndex,
-  total,
-  totalPages
-) {
-
-  const pagination =
-    el("casesPagination");
-
-  const previousButton =
-    el("previousPageBtn");
-
-  const nextButton =
-    el("nextPageBtn");
-
-  const pageNumber =
-    el("pageNumber");
-
-  const paginationInfo =
-    el("paginationInfo");
-
-  if (!pagination) {
-    return;
-  }
-
-  pagination.classList.remove(
-    "hidden"
-  );
-
-  if (paginationInfo) {
-
-    paginationInfo.textContent =
-      `Showing ${startIndex + 1}–${endIndex} of ${total}`;
-  }
-
-  if (pageNumber) {
-
-    pageNumber.textContent =
-      `Page ${state.currentPage} of ${totalPages}`;
-  }
-
-  if (previousButton) {
-
-    previousButton.disabled =
-      state.currentPage <= 1;
-  }
-
-  if (nextButton) {
-
-    nextButton.disabled =
-      state.currentPage >= totalPages;
-  }
-}
-
-/* -------------------------------------------------------
-   SUMMARY
-------------------------------------------------------- */
-
-function updateSummary(total) {
-
-  const summary =
-    el("caseResultSummary");
-
-  if (!summary) {
-    return;
-  }
-
-  if (!total) {
-
-    summary.textContent =
-      "No cases found.";
-
-    return;
-  }
-
-  summary.textContent =
-    total === 1
-      ? "1 case found."
-      : `${total} cases found.`;
-}
-
-/* -------------------------------------------------------
-   PAGE CONTROLS
-------------------------------------------------------- */
-
-function previousPage() {
-
-  if (
-    state.currentPage <= 1
-  ) {
-    return;
-  }
-
-  state.currentPage -= 1;
-
-  renderCases();
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
   });
 }
 
-function nextPage() {
-
-  const totalPages =
-    Math.ceil(
-      state.filteredCases.length /
-      state.pageSize
-    );
-
-  if (
-    state.currentPage >=
-    totalPages
-  ) {
-    return;
+function formatDate(timestamp) {
+  if (!timestamp?.toDate) {
+    return "—";
   }
 
-  state.currentPage += 1;
-
-  renderCases();
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
+  return timestamp.toDate().toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
   });
 }
 
-/* -------------------------------------------------------
-   FILTER CONTROLS
-------------------------------------------------------- */
+function renderRow(docSnap) {
+  const data = docSnap.data();
 
-function clearFilters() {
+  const statusClass = STATUS_BADGE_CLASSES[data.status] || "badge-neutral";
+  const statusLabel = STATUS_LABELS[data.status] || data.status || "—";
 
-  const caseSearch =
-    el("caseSearch");
+  const priorityClass = PRIORITY_BADGE_CLASSES[data.priority] || "badge-neutral";
+  const priorityLabel = PRIORITY_LABELS[data.priority] || data.priority || "—";
 
-  const statusFilter =
-    el("statusFilter");
+  const serviceLabel = SERVICE_LABELS[data.service] || data.service || "—";
 
-  const serviceFilter =
-    el("serviceFilter");
-
-  const priorityFilter =
-    el("priorityFilter");
-
-  if (caseSearch) {
-    caseSearch.value = "";
-  }
-
-  if (statusFilter) {
-    statusFilter.value = "";
-  }
-
-  if (serviceFilter) {
-    serviceFilter.value = "";
-  }
-
-  if (priorityFilter) {
-    priorityFilter.value = "";
-  }
-
-  /*
-   * Reload because status is also used as
-   * an optional server-side Firestore filter.
-   */
-  loadCases();
+  return `
+    <tr>
+      <td>
+        <a
+          href="./case-details.html?id=${esc(docSnap.id)}"
+          class="table-link"
+        >
+          ${esc(data.reference || docSnap.id)}
+        </a>
+      </td>
+      <td>${esc(data.applicantName || "—")}</td>
+      <td>${esc(serviceLabel)}</td>
+      <td>
+        <span class="badge ${statusClass}">${esc(statusLabel)}</span>
+      </td>
+      <td>
+        <span class="badge ${priorityClass}">${esc(priorityLabel)}</span>
+      </td>
+      <td>${formatDate(data.createdAt)}</td>
+      <td class="table-actions">
+        <a
+          href="./case-details.html?id=${esc(docSnap.id)}"
+          class="table-action-link"
+        >
+          View
+        </a>
+      </td>
+    </tr>
+  `;
 }
 
-/* -------------------------------------------------------
-   GLOBAL SEARCH
-------------------------------------------------------- */
+function setLoading() {
+  const { tbody, emptyState } = els();
 
-function initialiseGlobalSearch() {
+  emptyState.classList.add("hidden");
 
-  const input =
-    el("globalSearch");
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="7">
+        <div class="table-loading">
+          <div class="loading-spinner"></div>
+          <span>Loading cases...</span>
+        </div>
+      </td>
+    </tr>
+  `;
+}
 
-  if (!input) {
-    return;
+function renderResults(docs) {
+  const { tbody, emptyState, paginationInfo, pageNumber, prevBtn, nextBtn } = els();
+
+  if (docs.length === 0) {
+    tbody.innerHTML = "";
+    emptyState.classList.remove("hidden");
+  } else {
+    emptyState.classList.add("hidden");
+    tbody.innerHTML = docs.map(renderRow).join("");
   }
 
-  input.addEventListener(
-    "keydown",
-    event => {
+  paginationInfo.textContent = `Showing ${docs.length} case${docs.length === 1 ? "" : "s"}`;
+  pageNumber.textContent = `Page ${currentPageIndex + 1}`;
 
-      if (
-        event.key !== "Enter"
-      ) {
-        return;
-      }
+  prevBtn.disabled = currentPageIndex === 0;
 
-      const value =
-        input.value.trim();
-
-      if (!value) {
-        return;
-      }
-
-      const caseSearch =
-        el("caseSearch");
-
-      if (caseSearch) {
-        caseSearch.value =
-          value;
-      }
-
-      applyFilters();
-    }
-  );
+  // We don't know there's a next page until we've fetched a
+  // full page's worth of results (post-filter). If fewer came
+  // back than PAGE_SIZE, treat this as the last page.
+  nextBtn.disabled = docs.length < PAGE_SIZE;
 }
 
-/* -------------------------------------------------------
-   FILTER EVENTS
-------------------------------------------------------- */
-
-function initialiseFilters() {
-
-  const caseSearch =
-    el("caseSearch");
-
-  const serviceFilter =
-    el("serviceFilter");
-
-  const priorityFilter =
-    el("priorityFilter");
-
-  const statusFilter =
-    el("statusFilter");
-
-  /*
-   * Text search does not require a
-   * new Firestore request.
-   */
-  caseSearch?.addEventListener(
-    "input",
-    () => {
-      applyFilters();
-    }
-  );
-
-  /*
-   * These filters are handled locally
-   * except status, which also affects
-   * the Firestore query.
-   */
-  serviceFilter?.addEventListener(
-    "change",
-    () => {
-      applyFilters();
-    }
-  );
-
-  priorityFilter?.addEventListener(
-    "change",
-    () => {
-      applyFilters();
-    }
-  );
-
-  statusFilter?.addEventListener(
-    "change",
-    () => {
-      loadCases();
-    }
-  );
-}
-
-/* -------------------------------------------------------
-   BUTTON EVENTS
-------------------------------------------------------- */
-
-function initialiseButtons() {
-
-  el("previousPageBtn")
-    ?.addEventListener(
-      "click",
-      previousPage
-    );
-
-  el("nextPageBtn")
-    ?.addEventListener(
-      "click",
-      nextPage
-    );
-
-  el("refreshCasesBtn")
-    ?.addEventListener(
-      "click",
-      loadCases
-    );
-
-  el("clearFiltersBtn")
-    ?.addEventListener(
-      "click",
-      clearFilters
-    );
-
-  el("emptyClearFiltersBtn")
-    ?.addEventListener(
-      "click",
-      clearFilters
-    );
-}
-
-/* -------------------------------------------------------
-   LOADING
-------------------------------------------------------- */
-
-function showLoading() {
-
-  el("casesLoading")
-    ?.classList.remove(
-      "hidden"
-    );
-
-  el("casesTableContainer")
-    ?.classList.add(
-      "hidden"
-    );
-
-  el("casesEmpty")
-    ?.classList.add(
-      "hidden"
-    );
-}
-
-function hideLoading() {
-
-  el("casesLoading")
-    ?.classList.add(
-      "hidden"
-    );
-}
-
-/* -------------------------------------------------------
-   ERROR
-------------------------------------------------------- */
-
-function hideError() {
-
-  const errorBox =
-    el("casesError");
-
-  errorBox?.classList.add(
-    "hidden"
-  );
-}
-
-function showError(error) {
-
-  const errorBox =
-    el("casesError");
-
-  if (!errorBox) {
-    return;
-  }
-
-  let message =
-    "Unable to load service cases.";
-
-  if (
-    error?.code ===
-    "permission-denied"
-  ) {
-
-    message =
-      "You do not have permission to view service cases.";
-  }
-
-  if (
-    error?.code ===
-    "failed-precondition"
-  ) {
-
-    message =
-      "Firestore reported a query/index requirement. Check the Firebase Console for the required index.";
-  }
-
-  if (
-    error?.code ===
-    "unavailable"
-  ) {
-
-    message =
-      "The service is temporarily unavailable. Check your internet connection and try again.";
-  }
-
-  errorBox.textContent =
-    message;
-
-  errorBox.classList.remove(
-    "hidden"
-  );
-}
-
-/* -------------------------------------------------------
-   INITIALISE
-------------------------------------------------------- */
-
-async function initialiseCases() {
+async function loadPage(pageIndex, afterDoc) {
+  setLoading();
 
   try {
+    const snapshot = await getDocs(buildQuery(afterDoc));
 
-    /*
-     * Authenticate user and render
-     * shared application layout.
-     */
-    await initLayout();
+    let docs = snapshot.docs;
+    docs = filterFetchedDocs(docs);
+    docs = docs.slice(0, PAGE_SIZE);
 
-    initialiseGlobalSearch();
+    currentPageDocs = docs;
+    currentPageIndex = pageIndex;
 
-    initialiseFilters();
-
-    initialiseButtons();
-
-    /*
-     * Support dashboard/global search
-     * links such as:
-     *
-     * cases.html?search=EMBU-2026
-     */
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const initialSearch =
-      params.get("search");
-
-    if (
-      initialSearch
-    ) {
-
-      const searchInput =
-        el("caseSearch");
-
-      if (searchInput) {
-        searchInput.value =
-          initialSearch;
-      }
+    if (docs.length > 0) {
+      cursorHistory[pageIndex] = docs[docs.length - 1];
     }
 
-    await loadCases();
+    renderResults(docs);
 
   } catch (error) {
+    console.error("Failed to load cases:", error);
 
-    console.error(
-      "Cases initialisation failed:",
-      error
-    );
+    const { tbody, emptyState } = els();
+    emptyState.classList.add("hidden");
 
-    showError(
-      error
-    );
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="table-empty">
+          Something went wrong loading cases. Please refresh the page.
+        </td>
+      </tr>
+    `;
   }
 }
 
-document.addEventListener(
-  "DOMContentLoaded",
-  initialiseCases
-);
+function resetAndReload() {
+  cursorHistory = [];
+  currentPageIndex = 0;
+  loadPage(0, null);
+}
+
+function bindEvents() {
+  const {
+    filterSearch,
+    filterStatus,
+    filterPriority,
+    filterService,
+    prevBtn,
+    nextBtn
+  } = els();
+
+  filterSearch.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(resetAndReload, 300);
+  });
+
+  [filterStatus, filterPriority, filterService].forEach(select => {
+    select.addEventListener("change", resetAndReload);
+  });
+
+  prevBtn.addEventListener("click", () => {
+    if (currentPageIndex === 0) {
+      return;
+    }
+
+    const targetIndex = currentPageIndex - 1;
+    const afterDoc = targetIndex === 0 ? null : cursorHistory[targetIndex - 1];
+
+    loadPage(targetIndex, afterDoc);
+  });
+
+  nextBtn.addEventListener("click", () => {
+    if (currentPageDocs.length === 0) {
+      return;
+    }
+
+    const afterDoc = cursorHistory[currentPageIndex];
+    loadPage(currentPageIndex + 1, afterDoc);
+  });
+}
+
+async function init() {
+  await requireRole(["ADMIN", "SUPERVISOR", "OFFICER"]);
+
+  bindEvents();
+  loadPage(0, null);
+}
+
+init();
