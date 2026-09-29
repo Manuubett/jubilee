@@ -51,6 +51,26 @@ function formatDate(timestamp) {
   return date ? date.toISOString().slice(0, 10) : "";
 }
 
+/**
+ * Date + time in the office's local time, for the CSV export --
+ * shows when a case was actually created/resolved, not just the
+ * day, so cases from the same day can be told apart and ordered.
+ */
+function formatDateTime(timestamp) {
+  const date = toDate(timestamp);
+
+  if (!date) {
+    return "";
+  }
+
+  const pad = (n) => String(n).padStart(2, "0");
+
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+    `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  );
+}
+
 function applyDateFilter() {
   const fromValue = document.getElementById("fromDate").value;
   const toValue = document.getElementById("toDate").value;
@@ -209,7 +229,7 @@ function exportCsv() {
 
   const headers = [
     "Reference", "Service", "Status", "Priority", "Ward",
-    "Created", "Resolved",
+    "Created At", "Resolved At",
     "IPPMS status", "IPPMS reference", "Card issued",
     "Resignation notice date", "Registrar notified"
   ];
@@ -223,8 +243,8 @@ function exportCsv() {
       STATUS_LABELS[d.status] || d.status || "",
       d.priority || "",
       d.applicantWard || "",
-      formatDate(d.createdAt),
-      formatDate(d.resolvedAt),
+      formatDateTime(d.createdAt),
+      formatDateTime(d.resolvedAt),
       d.service === "MEMBERSHIP_REGISTRATION" ? (d.ippmsStatus || "NOT_SUBMITTED") : "",
       d.ippmsReference || "",
       d.service === "MEMBERSHIP_REGISTRATION" ? (d.cardIssued ? "Yes" : "No") : "",
